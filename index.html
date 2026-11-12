@@ -50,12 +50,12 @@
 
     <!-- Cabeçalho Principal -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 min-w-0">
                 <!-- Logo Centro de Saúde Nova Esperança (com fallback vetorial SVG idêntico) -->
                 <div class="shrink-0 flex items-center">
-                    <img src="logo centro de saude.png" alt="Centro de Saúde Nova Esperança" class="h-10 sm:h-12 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                    <svg class="hidden h-10 sm:h-12 w-auto" viewBox="0 0 680 185" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Centro de Saúde Nova Esperança">
+                    <img src="logo centro de saude.png" alt="Centro de Saúde Nova Esperança" class="h-9 sm:h-10 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <svg class="hidden h-9 sm:h-10 w-auto" viewBox="0 0 680 185" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Centro de Saúde Nova Esperança">
                         <!-- Coração estilizado externo -->
                         <path d="M98 48C86 24 58 14 34 24C8 35 -2 68 12 102C25 133 58 160 88 182C118 158 156 126 176 92C198 54 185 16 154 7C128 -1 108 16 98 48Z" fill="#1877B5"/>
                         <!-- Contorno branco interno esquerdo -->
@@ -75,11 +75,11 @@
                     </svg>
                 </div>
 
-                <div class="hidden md:block h-8 w-px bg-slate-200"></div>
+                <div class="hidden md:block h-7 w-px bg-slate-200"></div>
 
                 <div class="hidden md:block truncate">
-                    <h1 class="text-base font-bold text-slate-900 leading-tight">Auditório Principal CSNE</h1>
-                    <p class="text-xs text-slate-500">Sistema de Agendamento e Controle de Reservas do Auditório</p>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Gestão de Reservas — Auditório</h1>
+                    <p class="text-xs text-slate-500">Agendamento por data, turno e especialidade médica</p>
                 </div>
             </div>
 
@@ -464,7 +464,7 @@
                         <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
                         <span>Senha incorreta! Tente novamente.</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1.5">Senha padrão: <code class="font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">admin123</code></p>
+                    <p class="text-[11px] text-slate-400 mt-1.5">Exemplo: <code class="font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">admin123</code></p>
                 </div>
 
                 <div class="flex items-center gap-3 pt-2">
@@ -484,7 +484,7 @@
         // 1. CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
         // ==========================================
         const STORAGE_KEY = 'auditorio_reservas_v2';
-        const ADMIN_DELETE_PASSWORD = 'admin123'; // Senha padrão para exclusão
+        const ADMIN_DELETE_PASSWORD = 'csne2026'; // Senha padrão para exclusão
         const SHIFTS = ['Manhã', 'Tarde', 'Noite'];
         const WEEKDAY_NAMES = [
             'Domingo',
