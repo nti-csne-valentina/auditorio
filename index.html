@@ -126,14 +126,14 @@
     <!-- Conteúdo Principal -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         
-        <!-- Cards de Resumo Rápido -->
+        <!-- Cards de Resumo Rápido (Contabiliza apenas solicitações ativas: Autorizadas ou Pendentes) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
                 <div class="p-3 bg-teal-50 text-teal-600 rounded-xl">
                     <i data-lucide="bookmark-check" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Reservas</p>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Reservas Ativas</p>
                     <p id="statTotal" class="text-2xl font-bold text-slate-900">0</p>
                 </div>
             </div>
@@ -325,7 +325,7 @@
                                 <i data-lucide="list-checks" class="w-5 h-5 text-teal-600"></i>
                                 Reservas & Solicitações
                             </h2>
-                            <p class="text-xs text-slate-500">Aprove solicitações pendentes ou consulte datas e responsáveis</p>
+                            <p class="text-xs text-slate-500">Aprove, recuse solicitações pendentes ou consulte datas e responsáveis</p>
                         </div>
 
                         <div class="flex items-center gap-3 self-start sm:self-auto no-print">
@@ -368,6 +368,7 @@
                                 <option value="">Todos os Status</option>
                                 <option value="pending">Pendente de Autorização</option>
                                 <option value="authorized">Autorizada</option>
+                                <option value="rejected">Não Autorizada</option>
                             </select>
                         </div>
                     </div>
@@ -440,19 +441,34 @@
                     </div>
                 </div>
 
+                <!-- Bloco exibido quando a solicitação foi Não Autorizada -->
+                <div id="modalRejectionContainer" class="hidden text-xs">
+                    <span class="text-rose-700 font-semibold flex items-center gap-1.5 mb-1">
+                        <i data-lucide="shield-x" class="w-3.5 h-3.5"></i>
+                        Motivo da Não Autorização:
+                    </span>
+                    <p id="modalRejectionReason" class="text-rose-900 bg-rose-50 border border-rose-200 rounded-xl p-2.5 leading-relaxed"></p>
+                </div>
+
                 <div id="modalNotesContainer" class="text-xs">
                     <span class="text-slate-500 font-medium block mb-1">Observações / Recursos:</span>
                     <p id="modalNotes" class="text-slate-700 bg-amber-50/60 border border-amber-100 rounded-xl p-2.5"></p>
                 </div>
             </div>
 
-            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
-                <button type="button" id="modalApproveBtn" class="hidden inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition cursor-pointer">
-                    <i data-lucide="shield-check" class="w-4 h-4 pointer-events-none"></i>
-                    <span>Autorizar Solicitação</span>
-                </button>
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <button type="button" id="modalApproveBtn" class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition cursor-pointer">
+                        <i data-lucide="shield-check" class="w-4 h-4 pointer-events-none"></i>
+                        <span>Autorizar</span>
+                    </button>
+                    <button type="button" id="modalRejectBtn" class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition cursor-pointer">
+                        <i data-lucide="shield-x" class="w-4 h-4 pointer-events-none"></i>
+                        <span>Não Autorizar</span>
+                    </button>
+                </div>
                 <button type="button" onclick="closeModal()" class="ml-auto px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition cursor-pointer">
-                    Fechar Comprovante
+                    Fechar
                 </button>
             </div>
         </div>
@@ -510,6 +526,63 @@
         </div>
     </div>
 
+    <!-- Modal de "Não Autorizar" Solicitação Pendente (com Motivo Obrigatório) -->
+    <div id="rejectBookingModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 p-5">
+            <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="shield-x" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Não Autorizar Solicitação</h3>
+                <p class="text-xs text-slate-500 mt-1 mb-3">Informe o motivo da recusa. O horário será liberado automaticamente na grade.</p>
+            </div>
+
+            <!-- Resumo da Reserva Pendente -->
+            <div id="rejectBookingSummary" class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 mb-4 text-xs text-slate-700 space-y-1"></div>
+
+            <form id="rejectBookingForm" class="space-y-3" novalidate>
+                <div>
+                    <label for="rejectAdminNameInput" class="block text-xs font-medium text-slate-700 mb-1">Nome / Identificação do Administrador *</label>
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i data-lucide="user-check" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="rejectAdminNameInput" autocomplete="off" placeholder="Ex: Coordenação / Nome do Admin" class="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3.5 py-2.5 text-sm text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="rejectReasonInput" class="block text-xs font-medium text-slate-700 mb-1">Motivo / Observação da Não Autorização *</label>
+                    <textarea id="rejectReasonInput" rows="3" required placeholder="Descreva obrigatoriamente o motivo da não autorização (ex: Manutenção programada no auditório, evento institucional prioritário...)" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition"></textarea>
+                </div>
+
+                <div>
+                    <label for="rejectBookingPasswordInput" class="block text-xs font-medium text-slate-700 mb-1">Senha Administrativa *</label>
+                    <div class="relative">
+                        <input type="password" id="rejectBookingPasswordInput" autocomplete="off" placeholder="Digite a senha do administrador..." class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-10 py-2.5 text-sm text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition">
+                        <button type="button" id="toggleRejectBookingPwdBtn" title="Mostrar/Ocultar senha" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition cursor-pointer">
+                            <i id="toggleRejectBookingPwdIcon" data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
+                        </button>
+                    </div>
+                    <div id="rejectBookingError" class="hidden mt-2 text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span id="rejectBookingErrorText">Preencha todos os campos obrigatórios.</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5">Exemplo: <code class="font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">admin123</code></p>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" id="cancelRejectBookingBtn" class="flex-1 py-2.5 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 px-4 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition cursor-pointer">
+                        Confirmar Não Autorizado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal de Confirmação de Exclusão com Senha Padrão -->
     <div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
         <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-5">
@@ -554,7 +627,7 @@
         // 1. CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
         // ==========================================
         const STORAGE_KEY = 'auditorio_reservas_v3';
-        const ADMIN_DELETE_PASSWORD = 'csne2026'; // Senha padrão para exclusão
+        const ADMIN_DELETE_PASSWORD = 'csne2026'; // Senha padrão administrativa
         const AUDITORIUMS = ['Auditório Principal', 'Auditório Odonto'];
         const SHIFTS = ['Manhã', 'Tarde', 'Noite'];
         const WEEKDAY_NAMES = [
@@ -579,6 +652,7 @@
         let deleteMode = null; // 'single' | 'all'
         let pendingDeleteId = null;
         let pendingApproveId = null; // ID da reserva pendente aguardando aprovação do administrador
+        let pendingRejectId = null;  // ID da reserva pendente aguardando não autorização do administrador
         let gridReferenceDate = new Date(); // Referência para a semana exibida na grade
 
         // ==========================================
@@ -656,6 +730,12 @@
         function resetGridWeek() {
             gridReferenceDate = new Date();
             renderWeeklyGrid();
+        }
+
+        // Verifica se a reserva ocupa o horário (apenas 'pending' ou 'authorized' bloqueiam; 'rejected' libera)
+        function isActiveBooking(booking) {
+            const status = booking.status || 'authorized';
+            return status === 'pending' || status === 'authorized';
         }
 
         // ==========================================
@@ -750,7 +830,9 @@
             }
 
             const selectedShift = shiftRadio.value;
+            // Considera conflito apenas se houver reserva 'pending' ou 'authorized' ('rejected' não bloqueia)
             const conflict = bookings.find(b =>
+                isActiveBooking(b) &&
                 (b.auditorium || 'Auditório Principal') === selectedAuditorium &&
                 b.date === selectedDate &&
                 b.shift === selectedShift
@@ -761,10 +843,10 @@
             if (conflict) {
                 if (conflict.status === 'pending') {
                     hintBox.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
-                    hintBox.innerHTML = `<i data-lucide="clock" class="w-4 h-4 shrink-0"></i> <span><strong>Pendente:</strong> ${selectedAuditorium} possui solicitação aguardando autorização para <em>${conflict.responsible}</em>.</span>`;
+                    hintBox.innerHTML = `<i data-lucide="clock" class="w-4 h-4 shrink-0"></i> <span><strong>Pendente:</strong> ${selectedAuditorium} possui solicitação aguardando autorização para <em>${escapeHtml(conflict.responsible)}</em>.</span>`;
                 } else {
                     hintBox.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200');
-                    hintBox.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span><strong>Ocupado:</strong> ${selectedAuditorium} já autorizado para <em>${conflict.responsible}</em>.</span>`;
+                    hintBox.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span><strong>Ocupado:</strong> ${selectedAuditorium} já autorizado para <em>${escapeHtml(conflict.responsible)}</em>.</span>`;
                 }
             } else {
                 hintBox.classList.add('bg-emerald-50', 'text-emerald-700', 'border', 'border-emerald-200');
@@ -822,8 +904,9 @@
                 return;
             }
 
-            // Bloqueio de conflito (mesmo auditório, mesma data e mesmo turno já reservado ou pendente)
+            // Bloqueio de conflito apenas com reservas ativas ('pending' ou 'authorized'); 'rejected' libera o horário
             const conflict = bookings.find(b =>
+                isActiveBooking(b) &&
                 (b.auditorium || 'Auditório Principal') === auditorium &&
                 b.date === date &&
                 b.shift === shift
@@ -880,10 +963,11 @@
         // 5. RENDERIZAÇÃO DA GRADE SEMANAL E TABELA
         // ==========================================
         function updateStats() {
-            document.getElementById('statTotal').textContent = bookings.length;
-            document.getElementById('statManha').textContent = bookings.filter(b => b.shift === 'Manhã').length;
-            document.getElementById('statTarde').textContent = bookings.filter(b => b.shift === 'Tarde').length;
-            document.getElementById('statNoite').textContent = bookings.filter(b => b.shift === 'Noite').length;
+            const activeBookings = bookings.filter(isActiveBooking);
+            document.getElementById('statTotal').textContent = activeBookings.length;
+            document.getElementById('statManha').textContent = activeBookings.filter(b => b.shift === 'Manhã').length;
+            document.getElementById('statTarde').textContent = activeBookings.filter(b => b.shift === 'Tarde').length;
+            document.getElementById('statNoite').textContent = activeBookings.filter(b => b.shift === 'Noite').length;
         }
 
         function renderWeeklyGrid() {
@@ -910,7 +994,10 @@
                 const cells = weekDays.map(d => {
                     const isToday = d.iso === todayIso;
                     const slotBadges = targetAuditoriums.map(aud => {
+                        // Na grade semanal, apenas reservas ativas ('pending' ou 'authorized') aparecem como ocupadas;
+                        // reservas 'rejected' liberam automaticamente o horário.
                         const found = bookings.find(b =>
+                            isActiveBooking(b) &&
                             (b.auditorium || 'Auditório Principal') === aud &&
                             b.date === d.iso &&
                             b.shift === shift
@@ -990,23 +1077,39 @@
                 const aud = b.auditorium || 'Auditório Principal';
                 const badgeClass = AUDITORIUM_BADGES[aud] || AUDITORIUM_BADGES['Default'];
                 const dayName = b.day || getDayNameFromISO(b.date);
-                const isPending = b.status === 'pending';
+                const status = b.status || 'authorized';
+                const isPending = status === 'pending';
+                const isRejected = status === 'rejected';
 
-                const statusBadge = isPending
-                    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200"><i data-lucide="clock" class="w-3 h-3"></i> Pendente de Autorização</span>`
-                    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Autorizada</span>`;
+                let statusBadge = '';
+                let decisionDetails = '';
 
-                const approveBtn = isPending
+                if (isPending) {
+                    statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200"><i data-lucide="clock" class="w-3 h-3"></i> Pendente de Autorização</span>`;
+                } else if (isRejected) {
+                    statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200"><i data-lucide="shield-x" class="w-3 h-3"></i> Não Autorizada</span>`;
+                    const reasonText = b.rejectionReason ? ` — "${escapeHtml(b.rejectionReason)}"` : '';
+                    const rejectedByText = b.rejectedBy ? `Por ${escapeHtml(b.rejectedBy)}` : 'Recusada';
+                    decisionDetails = `<div class="mt-1 text-[11px] text-rose-700/90 leading-snug"><span class="font-semibold">${rejectedByText}</span>${reasonText}</div>`;
+                } else {
+                    statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Autorizada</span>`;
+                }
+
+                const decisionButtons = isPending
                     ? `<button type="button" data-action="approve-booking" data-id="${b.id}" title="Autorizar solicitação" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition cursor-pointer">
                             <i data-lucide="shield-check" class="w-3.5 h-3.5 pointer-events-none"></i>
                             <span>Autorizar</span>
+                       </button>
+                       <button type="button" data-action="reject-booking" data-id="${b.id}" title="Não autorizar solicitação" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition cursor-pointer">
+                            <i data-lucide="shield-x" class="w-3.5 h-3.5 pointer-events-none"></i>
+                            <span>Não Autorizar</span>
                        </button>`
                     : '';
 
                 return `
-                    <tr class="hover:bg-slate-50/80 transition">
+                    <tr class="hover:bg-slate-50/80 transition ${isRejected ? 'bg-rose-50/20' : ''}">
                         <td class="py-3 px-3 align-top">
-                            <div class="font-semibold text-slate-800">${formatDateBR(b.date)}</div>
+                            <div class="font-semibold ${isRejected ? 'text-slate-500 line-through' : 'text-slate-800'}">${formatDateBR(b.date)}</div>
                             <div class="text-xs text-slate-500">${dayName} • <span class="font-medium text-slate-700">${b.shift}</span></div>
                         </td>
                         <td class="py-3 px-3 align-top">
@@ -1017,10 +1120,11 @@
                         <td class="py-3 px-3 align-top">
                             <div class="font-medium text-slate-800">${escapeHtml(b.responsible)}</div>
                             <div class="mt-1">${statusBadge}</div>
+                            ${decisionDetails}
                         </td>
                         <td class="py-3 px-3 align-top text-right no-print">
-                            <div class="inline-flex items-center justify-end gap-1.5">
-                                ${approveBtn}
+                            <div class="inline-flex flex-wrap items-center justify-end gap-1.5">
+                                ${decisionButtons}
                                 <button type="button" data-action="view-details" data-id="${b.id}" title="Ver comprovante" class="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer">
                                     <i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
                                 </button>
@@ -1059,14 +1163,17 @@
         }
 
         // ==========================================
-        // 6. MODAIS, AUTORIZAÇÃO, EXCLUSÃO E EXPORTAÇÃO
+        // 6. MODAIS, AUTORIZAÇÃO, NÃO AUTORIZAÇÃO, EXCLUSÃO E EXPORTAÇÃO
         // ==========================================
         function openModal(id) {
             const item = bookings.find(b => b.id === id);
             if (!item) return;
 
             const dayName = item.day || getDayNameFromISO(item.date);
-            const isPending = item.status === 'pending';
+            const status = item.status || 'authorized';
+            const isPending = status === 'pending';
+            const isRejected = status === 'rejected';
+
             document.getElementById('modalDayDate').textContent = `${formatDateBR(item.date)} (${dayName})`;
             document.getElementById('modalShift').textContent = item.shift;
             document.getElementById('modalAuditorium').textContent = item.auditorium || 'Auditório Principal';
@@ -1074,19 +1181,47 @@
 
             const authEl = document.getElementById('modalAuthorizedBy');
             const approveBtn = document.getElementById('modalApproveBtn');
+            const rejectBtn = document.getElementById('modalRejectBtn');
+            const rejectionContainer = document.getElementById('modalRejectionContainer');
+
             if (isPending) {
                 authEl.textContent = 'Pendente de Autorização pelo Administrador';
                 authEl.className = 'font-semibold text-amber-700';
+
                 approveBtn.classList.remove('hidden');
                 approveBtn.onclick = () => {
                     closeModal();
                     requestApproveBooking(item.id);
                 };
+
+                rejectBtn.classList.remove('hidden');
+                rejectBtn.onclick = () => {
+                    closeModal();
+                    requestRejectBooking(item.id);
+                };
+
+                rejectionContainer.classList.add('hidden');
+            } else if (isRejected) {
+                authEl.textContent = `Não Autorizada por ${item.rejectedBy || 'Administrador'} (Horário Liberado)`;
+                authEl.className = 'font-semibold text-rose-700';
+
+                approveBtn.classList.add('hidden');
+                approveBtn.onclick = null;
+                rejectBtn.classList.add('hidden');
+                rejectBtn.onclick = null;
+
+                rejectionContainer.classList.remove('hidden');
+                document.getElementById('modalRejectionReason').textContent = item.rejectionReason || 'Motivo não informado.';
             } else {
                 authEl.textContent = `Autorizada por ${item.authorizedBy || 'Administrador'}`;
                 authEl.className = 'font-semibold text-emerald-700';
+
                 approveBtn.classList.add('hidden');
                 approveBtn.onclick = null;
+                rejectBtn.classList.add('hidden');
+                rejectBtn.onclick = null;
+
+                rejectionContainer.classList.add('hidden');
             }
 
             const notesContainer = document.getElementById('modalNotesContainer');
@@ -1199,6 +1334,111 @@
             closeAuthBookingModal();
         });
 
+        // Fluxo de "Não Autorizar" Solicitação Pendente (com observação obrigatória do motivo)
+        function requestRejectBooking(id) {
+            const item = bookings.find(b => b.id === id);
+            if (!item) return;
+
+            pendingRejectId = id;
+            const dayName = item.day || getDayNameFromISO(item.date);
+            document.getElementById('rejectBookingSummary').innerHTML = `
+                <div><strong>Auditório:</strong> ${escapeHtml(item.auditorium || 'Auditório Principal')}</div>
+                <div><strong>Data / Turno:</strong> ${formatDateBR(item.date)} (${dayName}) — ${item.shift}</div>
+                <div><strong>Solicitante:</strong> ${escapeHtml(item.responsible)}</div>
+            `;
+
+            const nameInput = document.getElementById('rejectAdminNameInput');
+            const reasonInput = document.getElementById('rejectReasonInput');
+            const pwdInput = document.getElementById('rejectBookingPasswordInput');
+            const errBox = document.getElementById('rejectBookingError');
+
+            nameInput.value = '';
+            reasonInput.value = '';
+            pwdInput.value = '';
+            pwdInput.type = 'password';
+            document.getElementById('toggleRejectBookingPwdIcon').setAttribute('data-lucide', 'eye');
+            errBox.classList.add('hidden');
+
+            const modal = document.getElementById('rejectBookingModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+            setTimeout(() => nameInput.focus(), 50);
+        }
+
+        function closeRejectBookingModal() {
+            const modal = document.getElementById('rejectBookingModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pendingRejectId = null;
+        }
+
+        document.getElementById('toggleRejectBookingPwdBtn').addEventListener('click', () => {
+            const pwdInput = document.getElementById('rejectBookingPasswordInput');
+            const icon = document.getElementById('toggleRejectBookingPwdIcon');
+            const isHidden = pwdInput.type === 'password';
+            pwdInput.type = isHidden ? 'text' : 'password';
+            icon.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
+            lucide.createIcons();
+            pwdInput.focus();
+        });
+
+        document.getElementById('cancelRejectBookingBtn').addEventListener('click', closeRejectBookingModal);
+
+        document.getElementById('rejectBookingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const adminName = document.getElementById('rejectAdminNameInput').value.trim();
+            const reasonInput = document.getElementById('rejectReasonInput');
+            const reason = reasonInput.value.trim();
+            const pwdInput = document.getElementById('rejectBookingPasswordInput');
+            const errBox = document.getElementById('rejectBookingError');
+            const errText = document.getElementById('rejectBookingErrorText');
+
+            if (!adminName) {
+                errText.textContent = 'Informe o nome ou identificação do administrador.';
+                errBox.classList.remove('hidden');
+                errBox.classList.remove('animate-shake');
+                void errBox.offsetWidth;
+                errBox.classList.add('animate-shake');
+                document.getElementById('rejectAdminNameInput').focus();
+                return;
+            }
+
+            if (!reason) {
+                errText.textContent = 'A observação com o motivo da não autorização é obrigatória.';
+                errBox.classList.remove('hidden');
+                errBox.classList.remove('animate-shake');
+                void errBox.offsetWidth;
+                errBox.classList.add('animate-shake');
+                reasonInput.focus();
+                return;
+            }
+
+            if (pwdInput.value.trim() !== ADMIN_DELETE_PASSWORD) {
+                errText.textContent = 'Senha incorreta! Ação não confirmada.';
+                errBox.classList.remove('hidden');
+                errBox.classList.remove('animate-shake');
+                void errBox.offsetWidth;
+                errBox.classList.add('animate-shake');
+                pwdInput.value = '';
+                pwdInput.focus();
+                return;
+            }
+
+            const idx = bookings.findIndex(b => b.id === pendingRejectId);
+            if (idx !== -1) {
+                bookings[idx].status = 'rejected';
+                bookings[idx].rejectedBy = adminName;
+                bookings[idx].rejectionReason = reason;
+                bookings[idx].rejectedAt = new Date().toISOString();
+                saveBookingsToStorage();
+                renderAll();
+                showToast(`Solicitação marcada como Não Autorizada por ${adminName}. Horário liberado na grade.`, 'info');
+            }
+
+            closeRejectBookingModal();
+        });
+
         // Fluxo de Exclusão com Senha Padrão
         function requestDeleteSingle(id) {
             const item = bookings.find(b => b.id === id);
@@ -1276,7 +1516,7 @@
             closeDeleteModal();
         });
 
-        // Alternar visualização da senha no modal
+        // Alternar visualização da senha no modal de exclusão
         document.getElementById('togglePasswordVisibilityBtn').addEventListener('click', () => {
             const pwdInput = document.getElementById('deletePasswordInput');
             const toggleIcon = document.getElementById('togglePasswordIcon');
@@ -1289,7 +1529,7 @@
 
         document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
 
-        // Delegação de eventos global para os botões de ação (Autorizar, Excluir, Limpar Todas, Detalhes e Fechar Modais)
+        // Delegação de eventos global para os botões de ação (Autorizar, Não Autorizar, Excluir, Limpar Todas, Detalhes e Fechar Modais)
         document.addEventListener('click', (e) => {
             const actionBtn = e.target.closest('[data-action]');
             if (actionBtn) {
@@ -1300,6 +1540,8 @@
                     openModal(id);
                 } else if (action === 'approve-booking' && id) {
                     requestApproveBooking(id);
+                } else if (action === 'reject-booking' && id) {
+                    requestRejectBooking(id);
                 } else if (action === 'delete-single' && id) {
                     requestDeleteSingle(id);
                 } else if (action === 'delete-all') {
@@ -1311,6 +1553,7 @@
             // Fecha modais ao clicar no backdrop escuro
             if (e.target.id === 'detailsModal') closeModal();
             if (e.target.id === 'authBookingModal') closeAuthBookingModal();
+            if (e.target.id === 'rejectBookingModal') closeRejectBookingModal();
             if (e.target.id === 'deleteConfirmModal') closeDeleteModal();
         });
 
@@ -1319,6 +1562,7 @@
             if (e.key === 'Escape') {
                 closeModal();
                 closeAuthBookingModal();
+                closeRejectBookingModal();
                 closeDeleteModal();
             }
         });
@@ -1330,17 +1574,31 @@
                 return;
             }
 
-            const headers = ['Data', 'Dia da Semana', 'Turno', 'Auditório', 'Responsável', 'Status', 'Autorizado Por', 'Observações'];
-            const rows = bookings.map(b => [
-                formatDateBR(b.date),
-                b.day || getDayNameFromISO(b.date),
-                b.shift,
-                b.auditorium || 'Auditório Principal',
-                b.responsible,
-                b.status === 'pending' ? 'Pendente de Autorização' : 'Autorizada',
-                b.authorizedBy || '-',
-                (b.notes || '').replace(/\r?\n|\r/g, ' ')
-            ]);
+            const headers = ['Data', 'Dia da Semana', 'Turno', 'Auditório', 'Responsável', 'Status', 'Autorizado / Negado Por', 'Motivo da Não Autorização', 'Observações'];
+            const rows = bookings.map(b => {
+                const status = b.status || 'authorized';
+                let statusLabel = 'Autorizada';
+                let decisionBy = b.authorizedBy || '-';
+                if (status === 'pending') {
+                    statusLabel = 'Pendente de Autorização';
+                    decisionBy = '-';
+                } else if (status === 'rejected') {
+                    statusLabel = 'Não Autorizada';
+                    decisionBy = b.rejectedBy || '-';
+                }
+
+                return [
+                    formatDateBR(b.date),
+                    b.day || getDayNameFromISO(b.date),
+                    b.shift,
+                    b.auditorium || 'Auditório Principal',
+                    b.responsible,
+                    statusLabel,
+                    decisionBy,
+                    (b.rejectionReason || '-').replace(/\r?\n|\r/g, ' '),
+                    (b.notes || '').replace(/\r?\n|\r/g, ' ')
+                ];
+            });
 
             const csvContent = '\uFEFF' + [headers, ...rows]
                 .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';'))
