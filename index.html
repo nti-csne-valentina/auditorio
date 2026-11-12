@@ -78,8 +78,8 @@
                 <div class="hidden md:block h-7 w-px bg-slate-200"></div>
 
                 <div class="hidden md:block truncate">
-                    <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Gestão de Reservas — Auditório</h1>
-                    <p class="text-xs text-slate-500">Agendamento por data, turno e especialidade médica</p>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Gestão de Reservas — Auditórios</h1>
+                    <p class="text-xs text-slate-500">Agendamento por auditório, data e turno</p>
                 </div>
             </div>
 
@@ -112,8 +112,8 @@
                     <text x="196" y="147" fill="#FFFFFF" font-family="'Inter', 'Arial Narrow', sans-serif" font-weight="800" font-size="53" letter-spacing="0.5">NOVA ESPERANÇA</text>
                 </svg>
                 <div>
-                    <h1 class="text-xl font-bold text-slate-900">Cronograma Oficial de Reservas — Auditório</h1>
-                    <p class="text-xs text-slate-600 mt-0.5">Relatório de ocupação por data, turno e especialidade</p>
+                    <h1 class="text-xl font-bold text-slate-900">Cronograma Oficial de Reservas — Auditórios</h1>
+                    <p class="text-xs text-slate-600 mt-0.5">Relatório de ocupação por auditório, data e turno</p>
                 </div>
             </div>
             <p class="text-xs text-slate-500 text-right" id="printDate"></p>
@@ -179,6 +179,27 @@
                 </div>
 
                 <form id="bookingForm" class="space-y-4" novalidate>
+                    <!-- Seleção do Auditório -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Auditório *</label>
+                        <div class="grid grid-cols-2 gap-2.5" id="auditoriumGroup">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="auditorium" value="Auditório Principal" class="peer sr-only" checked required>
+                                <div class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-600 peer-checked:border-teal-600 peer-checked:bg-teal-50 peer-checked:text-teal-800 hover:bg-slate-100 transition">
+                                    <i data-lucide="building-2" class="w-4 h-4 shrink-0"></i>
+                                    <span class="text-xs font-semibold">Auditório Principal</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="auditorium" value="Auditório Odonto" class="peer sr-only">
+                                <div class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-600 peer-checked:border-sky-600 peer-checked:bg-sky-50 peer-checked:text-sky-800 hover:bg-slate-100 transition">
+                                    <i data-lucide="stethoscope" class="w-4 h-4 shrink-0"></i>
+                                    <span class="text-xs font-semibold">Auditório Odonto</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Data da Reserva (Dia da semana derivado automaticamente) -->
                     <div>
                         <div class="flex items-center justify-between mb-1">
@@ -224,27 +245,6 @@
                         <div id="availabilityHint" class="mt-2 text-xs hidden rounded-lg px-3 py-2 flex items-center gap-2"></div>
                     </div>
 
-                    <!-- Especialidade Médica -->
-                    <div>
-                        <label for="specialtySelect" class="block text-sm font-medium text-slate-700 mb-1">Especialidade *</label>
-                        <select id="specialtySelect" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
-                            <option value="" disabled selected>Escolha a especialidade...</option>
-                            <option value="Odontologia">Odontologia</option>
-                            <option value="Medicina">Medicina</option>
-                            <option value="Fisioterapia">Fisioterapia</option>
-                            <option value="Oftalmologia">Oftalmologia</option>
-                            <option value="Dermatologia">Dermatologia</option>
-                            <option value="Enfermagem">Enfermagem</option>
-                            <option value="Outra">Outra Especialidade...</option>
-                        </select>
-                    </div>
-
-                    <!-- Campo condicional para "Outra" especialidade -->
-                    <div id="otherSpecialtyContainer" class="hidden">
-                        <label for="otherSpecialtyInput" class="block text-sm font-medium text-slate-700 mb-1">Qual especialidade/evento? *</label>
-                        <input type="text" id="otherSpecialtyInput" placeholder="Ex: Enfermagem, Nutrição, Palestra Geral..." class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
-                    </div>
-
                     <!-- Nome do Responsável -->
                     <div>
                         <label for="responsibleInput" class="block text-sm font-medium text-slate-700 mb-1">Nome do Responsável pela Reserva *</label>
@@ -265,8 +265,8 @@
                     <!-- Botão de Submissão -->
                     <div class="pt-2">
                         <button type="submit" class="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow transition focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
-                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                            Confirmar e Salvar Reserva
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                            Enviar Solicitação de Reserva
                         </button>
                     </div>
                 </form>
@@ -283,9 +283,14 @@
                                 <i data-lucide="layout-grid" class="w-5 h-5 text-teal-600"></i>
                                 Grade Semanal de Ocupação
                             </h2>
-                            <p class="text-xs text-slate-500">Ocupação por data e turno na semana selecionada</p>
+                            <p class="text-xs text-slate-500">Ocupação por auditório, data e turno na semana selecionada</p>
                         </div>
-                        <div class="flex items-center gap-2 no-print">
+                        <div class="flex flex-wrap items-center gap-2 no-print">
+                            <select id="gridAuditoriumFilter" aria-label="Filtrar grade por auditório" class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
+                                <option value="ALL">Todos Auditórios</option>
+                                <option value="Auditório Principal">Auditório Principal</option>
+                                <option value="Auditório Odonto">Auditório Odonto</option>
+                            </select>
                             <button type="button" onclick="changeGridWeek(-7)" title="Semana anterior" class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
                                 <i data-lucide="chevron-left" class="w-4 h-4"></i>
                             </button>
@@ -318,9 +323,9 @@
                         <div>
                             <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="list-checks" class="w-5 h-5 text-teal-600"></i>
-                                Reservas Confirmadas
+                                Reservas & Solicitações
                             </h2>
-                            <p class="text-xs text-slate-500">Consulte datas, responsáveis e observações</p>
+                            <p class="text-xs text-slate-500">Aprove solicitações pendentes ou consulte datas e responsáveis</p>
                         </div>
 
                         <div class="flex items-center gap-3 self-start sm:self-auto no-print">
@@ -335,7 +340,7 @@
                     </div>
 
                     <!-- Barra de Filtros -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 no-print">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5 no-print">
                         <div>
                             <label for="filterDate" class="sr-only">Filtrar por Data</label>
                             <input type="date" id="filterDate" title="Filtrar por data específica" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
@@ -350,15 +355,19 @@
                             </select>
                         </div>
                         <div>
-                            <label for="filterSpecialty" class="sr-only">Filtrar por Especialidade</label>
-                            <select id="filterSpecialty" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
-                                <option value="">Todas Especialidades</option>
-                                <option value="Odontologia">Odontologia</option>
-                                <option value="Medicina">Medicina</option>
-                                <option value="Fisioterapia">Fisioterapia</option>
-                                <option value="Oftalmologia">Oftalmologia</option>
-                                <option value="Dermatologia">Dermatologia</option>
-                                <option value="Outra">Outras</option>
+                            <label for="filterAuditorium" class="sr-only">Filtrar por Auditório</label>
+                            <select id="filterAuditorium" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
+                                <option value="">Todos os Auditórios</option>
+                                <option value="Auditório Principal">Auditório Principal</option>
+                                <option value="Auditório Odonto">Auditório Odonto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterStatus" class="sr-only">Filtrar por Status</label>
+                            <select id="filterStatus" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
+                                <option value="">Todos os Status</option>
+                                <option value="pending">Pendente de Autorização</option>
+                                <option value="authorized">Autorizada</option>
                             </select>
                         </div>
                     </div>
@@ -369,8 +378,8 @@
                             <thead>
                                 <tr class="border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                                     <th class="py-3 px-3">Data / Turno</th>
-                                    <th class="py-3 px-3">Especialidade</th>
-                                    <th class="py-3 px-3">Responsável</th>
+                                    <th class="py-3 px-3">Auditório</th>
+                                    <th class="py-3 px-3">Responsável / Status</th>
                                     <th class="py-3 px-3 text-right no-print">Ações</th>
                                 </tr>
                             </thead>
@@ -418,12 +427,16 @@
                         <span id="modalShift" class="font-semibold text-slate-800"></span>
                     </div>
                     <div>
-                        <span class="text-slate-400 block">Especialidade</span>
-                        <span id="modalSpecialty" class="font-semibold text-teal-700"></span>
+                        <span class="text-slate-400 block">Auditório</span>
+                        <span id="modalAuditorium" class="font-semibold text-teal-700"></span>
                     </div>
                     <div>
                         <span class="text-slate-400 block">Responsável</span>
                         <span id="modalResponsible" class="font-semibold text-slate-800"></span>
+                    </div>
+                    <div id="modalAuthStatusBox" class="col-span-2 pt-2 border-t border-slate-200/70">
+                        <span class="text-slate-400 block">Status da Solicitação</span>
+                        <span id="modalAuthorizedBy" class="font-semibold text-emerald-700"></span>
                     </div>
                 </div>
 
@@ -433,11 +446,67 @@
                 </div>
             </div>
 
-            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex justify-end">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition">
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                <button type="button" id="modalApproveBtn" class="hidden inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition cursor-pointer">
+                    <i data-lucide="shield-check" class="w-4 h-4 pointer-events-none"></i>
+                    <span>Autorizar Solicitação</span>
+                </button>
+                <button type="button" onclick="closeModal()" class="ml-auto px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition cursor-pointer">
                     Fechar Comprovante
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Autorização do Administrador para Solicitação Pendente -->
+    <div id="authBookingModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 p-5">
+            <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Autorizar Solicitação Pendente</h3>
+                <p class="text-xs text-slate-500 mt-1 mb-3">Autentique-se como administrador para aprovar e confirmar esta reserva.</p>
+            </div>
+
+            <!-- Resumo da Reserva Pendente -->
+            <div id="authBookingSummary" class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 mb-4 text-xs text-slate-700 space-y-1"></div>
+
+            <form id="authBookingForm" class="space-y-3" novalidate>
+                <div>
+                    <label for="authAdminNameInput" class="block text-xs font-medium text-slate-700 mb-1">Nome / Identificação do Administrador *</label>
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i data-lucide="user-check" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="authAdminNameInput" autocomplete="off" placeholder="Ex: Coordenação / Nome do Admin" class="w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="authBookingPasswordInput" class="block text-xs font-medium text-slate-700 mb-1">Senha Administrativa *</label>
+                    <div class="relative">
+                        <input type="password" id="authBookingPasswordInput" autocomplete="off" placeholder="Digite a senha do administrador..." class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-10 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                        <button type="button" id="toggleAuthBookingPwdBtn" title="Mostrar/Ocultar senha" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition cursor-pointer">
+                            <i id="toggleAuthBookingPwdIcon" data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
+                        </button>
+                    </div>
+                    <div id="authBookingError" class="hidden mt-2 text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span id="authBookingErrorText">Senha incorreta! Autorização negada.</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1.5">Exemplo: <code class="font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">admin123</code></p>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" id="cancelAuthBookingBtn" class="flex-1 py-2.5 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 px-4 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-sm transition cursor-pointer">
+                        Autorizar Reserva
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -484,8 +553,9 @@
         // ==========================================
         // 1. CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
         // ==========================================
-        const STORAGE_KEY = 'auditorio_reservas_v2';
+        const STORAGE_KEY = 'auditorio_reservas_v3';
         const ADMIN_DELETE_PASSWORD = 'csne2026'; // Senha padrão para exclusão
+        const AUDITORIUMS = ['Auditório Principal', 'Auditório Odonto'];
         const SHIFTS = ['Manhã', 'Tarde', 'Noite'];
         const WEEKDAY_NAMES = [
             'Domingo',
@@ -498,19 +568,17 @@
         ];
         const WEEKDAY_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-        // Cores por especialidade
-        const SPECIALTY_BADGES = {
-            'Odontologia': 'bg-sky-50 text-sky-700 border-sky-200',
-            'Medicina': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-            'Fisioterapia': 'bg-amber-50 text-amber-700 border-amber-200',
-            'Oftalmologia': 'bg-purple-50 text-purple-700 border-purple-200',
-            'Dermatologia': 'bg-rose-50 text-rose-700 border-rose-200',
+        // Cores por auditório
+        const AUDITORIUM_BADGES = {
+            'Auditório Principal': 'bg-teal-50 text-teal-800 border-teal-200',
+            'Auditório Odonto': 'bg-sky-50 text-sky-800 border-sky-200',
             'Default': 'bg-slate-100 text-slate-700 border-slate-200'
         };
 
         let bookings = [];
         let deleteMode = null; // 'single' | 'all'
         let pendingDeleteId = null;
+        let pendingApproveId = null; // ID da reserva pendente aguardando aprovação do administrador
         let gridReferenceDate = new Date(); // Referência para a semana exibida na grade
 
         // ==========================================
@@ -597,39 +665,48 @@
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
-                    bookings = JSON.parse(stored);
+                    bookings = JSON.parse(stored).map(b => ({
+                        ...b,
+                        status: b.status || 'authorized'
+                    }));
                 } else {
                     // Exemplos iniciais na semana atual
                     const weekDays = getWeekDays(new Date());
                     bookings = [
                         {
                             id: 'demo-1',
+                            auditorium: 'Auditório Principal',
                             date: weekDays[0].iso,
                             day: weekDays[0].fullName,
                             shift: 'Manhã',
-                            specialty: 'Medicina',
                             responsible: 'Dr. Carlos Eduardo Mendes',
+                            status: 'authorized',
+                            authorizedBy: 'Coordenação Administrativa',
                             notes: 'Simpósio de Clínica Médica — Projetor e 2 microfones.',
                             createdAt: new Date().toISOString()
                         },
                         {
                             id: 'demo-2',
+                            auditorium: 'Auditório Odonto',
                             date: weekDays[2].iso,
                             day: weekDays[2].fullName,
                             shift: 'Tarde',
-                            specialty: 'Odontologia',
                             responsible: 'Dra. Mariana Albuquerque',
+                            status: 'pending',
+                            authorizedBy: '',
                             notes: 'Aula magna de Implantodontia.',
                             createdAt: new Date().toISOString()
                         },
                         {
                             id: 'demo-3',
+                            auditorium: 'Auditório Principal',
                             date: weekDays[4].iso,
                             day: weekDays[4].fullName,
                             shift: 'Noite',
-                            specialty: 'Dermatologia',
                             responsible: 'Dra. Beatriz Vasconcelos',
-                            notes: 'Workshop de Dermatoscopia.',
+                            status: 'authorized',
+                            authorizedBy: 'Diretoria Clínica',
+                            notes: 'Reunião geral do corpo clínico.',
                             createdAt: new Date().toISOString()
                         }
                     ];
@@ -656,43 +733,42 @@
         dateInput.value = getTodayISO();
         updateDerivedDayLabel();
 
-        const specialtySelect = document.getElementById('specialtySelect');
-        const otherSpecialtyContainer = document.getElementById('otherSpecialtyContainer');
-        const otherSpecialtyInput = document.getElementById('otherSpecialtyInput');
-
-        specialtySelect.addEventListener('change', () => {
-            if (specialtySelect.value === 'Outra') {
-                otherSpecialtyContainer.classList.remove('hidden');
-                otherSpecialtyInput.required = true;
-                otherSpecialtyInput.focus();
-            } else {
-                otherSpecialtyContainer.classList.add('hidden');
-                otherSpecialtyInput.required = false;
-                otherSpecialtyInput.value = '';
-            }
-        });
+        function getSelectedAuditorium() {
+            const checked = document.querySelector('input[name="auditorium"]:checked');
+            return checked ? checked.value : '';
+        }
 
         function checkInstantAvailability() {
+            const selectedAuditorium = getSelectedAuditorium();
             const selectedDate = dateInput.value;
             const shiftRadio = document.querySelector('input[name="shift"]:checked');
             const hintBox = document.getElementById('availabilityHint');
 
-            if (!selectedDate || !shiftRadio) {
+            if (!selectedAuditorium || !selectedDate || !shiftRadio) {
                 hintBox.classList.add('hidden');
                 return;
             }
 
             const selectedShift = shiftRadio.value;
-            const conflict = bookings.find(b => b.date === selectedDate && b.shift === selectedShift);
+            const conflict = bookings.find(b =>
+                (b.auditorium || 'Auditório Principal') === selectedAuditorium &&
+                b.date === selectedDate &&
+                b.shift === selectedShift
+            );
 
-            hintBox.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200', 'border');
+            hintBox.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200', 'bg-amber-50', 'text-amber-800', 'border-amber-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200', 'border');
             
             if (conflict) {
-                hintBox.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200');
-                hintBox.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span><strong>Ocupado:</strong> Já reservado para <em>${conflict.specialty}</em> (${conflict.responsible}).</span>`;
+                if (conflict.status === 'pending') {
+                    hintBox.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+                    hintBox.innerHTML = `<i data-lucide="clock" class="w-4 h-4 shrink-0"></i> <span><strong>Pendente:</strong> ${selectedAuditorium} possui solicitação aguardando autorização para <em>${conflict.responsible}</em>.</span>`;
+                } else {
+                    hintBox.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200');
+                    hintBox.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span><strong>Ocupado:</strong> ${selectedAuditorium} já autorizado para <em>${conflict.responsible}</em>.</span>`;
+                }
             } else {
                 hintBox.classList.add('bg-emerald-50', 'text-emerald-700', 'border', 'border-emerald-200');
-                hintBox.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span><strong>Disponível:</strong> Horário livre em ${formatDateBR(selectedDate)} (${getDayNameFromISO(selectedDate)}).</span>`;
+                hintBox.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span><strong>Disponível:</strong> ${selectedAuditorium} livre em ${formatDateBR(selectedDate)} (${getDayNameFromISO(selectedDate)}).</span>`;
             }
             lucide.createIcons();
         }
@@ -707,23 +783,30 @@
             }
         });
 
+        document.querySelectorAll('input[name="auditorium"]').forEach(radio => {
+            radio.addEventListener('change', checkInstantAvailability);
+        });
+
         document.querySelectorAll('input[name="shift"]').forEach(radio => {
             radio.addEventListener('change', checkInstantAvailability);
         });
 
-        // Submissão do formulário
+        // Submissão do formulário -> Registra com status "pending" (Pendente de Autorização)
         document.getElementById('bookingForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
+            const auditorium = getSelectedAuditorium();
             const date = dateInput.value;
             const day = getDayNameFromISO(date);
             const shiftEl = document.querySelector('input[name="shift"]:checked');
             const shift = shiftEl ? shiftEl.value : '';
-            const rawSpecialty = specialtySelect.value;
-            const specialty = rawSpecialty === 'Outra' ? otherSpecialtyInput.value.trim() : rawSpecialty;
             const responsible = document.getElementById('responsibleInput').value.trim();
             const notes = document.getElementById('notesInput').value.trim();
 
+            if (!auditorium) {
+                showToast('Selecione o auditório desejado.', 'error');
+                return;
+            }
             if (!date) {
                 showToast('Selecione a data da reserva.', 'error');
                 dateInput.focus();
@@ -733,31 +816,33 @@
                 showToast('Selecione o turno desejado (Manhã, Tarde ou Noite).', 'error');
                 return;
             }
-            if (!specialty) {
-                showToast('Informe a especialidade médica.', 'error');
-                specialtySelect.focus();
-                return;
-            }
             if (!responsible) {
                 showToast('Informe o nome do responsável pela reserva.', 'error');
                 document.getElementById('responsibleInput').focus();
                 return;
             }
 
-            // Bloqueio de conflito (mesma data e mesmo turno)
-            const hasConflict = bookings.some(b => b.date === date && b.shift === shift);
-            if (hasConflict) {
-                showToast(`Conflito! O auditório já está ocupado em ${formatDateBR(date)} no turno da ${shift}.`, 'error');
+            // Bloqueio de conflito (mesmo auditório, mesma data e mesmo turno já reservado ou pendente)
+            const conflict = bookings.find(b =>
+                (b.auditorium || 'Auditório Principal') === auditorium &&
+                b.date === date &&
+                b.shift === shift
+            );
+            if (conflict) {
+                const statusLabel = conflict.status === 'pending' ? 'possui uma solicitação pendente' : 'já está autorizado';
+                showToast(`Conflito! O ${auditorium} ${statusLabel} em ${formatDateBR(date)} no turno da ${shift}.`, 'error');
                 return;
             }
 
             const newBooking = {
                 id: 'res-' + Date.now(),
+                auditorium,
                 date,
                 day,
                 shift,
-                specialty,
                 responsible,
+                status: 'pending',
+                authorizedBy: '',
                 notes,
                 createdAt: new Date().toISOString()
             };
@@ -766,28 +851,34 @@
             saveBookingsToStorage();
             renderAll();
 
-            // Limpa apenas campos específicos, preservando a data
+            // Limpa apenas campos específicos, preservando auditório e data
             document.querySelectorAll('input[name="shift"]').forEach(r => r.checked = false);
-            specialtySelect.value = '';
-            otherSpecialtyContainer.classList.add('hidden');
-            otherSpecialtyInput.value = '';
             document.getElementById('responsibleInput').value = '';
             document.getElementById('notesInput').value = '';
             document.getElementById('availabilityHint').classList.add('hidden');
 
-            showToast(`Reserva confirmada para ${formatDateBR(date)} (${shift})!`, 'success');
+            showToast(`Solicitação enviada! Aguardando autorização do administrador (${auditorium} - ${formatDateBR(date)}).`, 'info');
         });
 
-        // ==========================================
-        // 5. RENDERIZAÇÃO DA GRADE, TABELA E CARDS
-        // ==========================================
-        function renderAll() {
-            updateStats();
-            renderWeeklyGrid();
-            renderBookingsTable();
-            document.getElementById('printDate').textContent = `Emitido em: ${new Date().toLocaleString('pt-BR')}`;
+        // Preenche automaticamente o formulário ao clicar em um horário livre na grade
+        function quickFillSlot(auditorium, dateIso, shift) {
+            const audRadio = document.querySelector(`input[name="auditorium"][value="${auditorium}"]`);
+            if (audRadio) audRadio.checked = true;
+
+            dateInput.value = dateIso;
+            updateDerivedDayLabel();
+
+            const shiftRadio = document.querySelector(`input[name="shift"][value="${shift}"]`);
+            if (shiftRadio) shiftRadio.checked = true;
+
+            checkInstantAvailability();
+            document.getElementById('responsibleInput').focus();
+            showToast(`Horário selecionado: ${auditorium} • ${formatDateBR(dateIso)} (${shift}).`, 'info');
         }
 
+        // ==========================================
+        // 5. RENDERIZAÇÃO DA GRADE SEMANAL E TABELA
+        // ==========================================
         function updateStats() {
             document.getElementById('statTotal').textContent = bookings.length;
             document.getElementById('statManha').textContent = bookings.filter(b => b.shift === 'Manhã').length;
@@ -796,168 +887,207 @@
         }
 
         function renderWeeklyGrid() {
-            const theadRow = document.getElementById('weeklyGridHeader');
-            const tbody = document.getElementById('weeklyGridBody');
             const weekDays = getWeekDays(gridReferenceDate);
-            const todayISO = getTodayISO();
+            const selectedAudFilter = document.getElementById('gridAuditoriumFilter').value;
+            const todayIso = getTodayISO();
 
-            theadRow.innerHTML = `<th class="py-2.5 px-3 font-semibold w-24">Turno</th>`;
-            weekDays.forEach(d => {
-                const isToday = d.iso === todayISO;
-                theadRow.innerHTML += `
-                    <th class="py-2 px-2 font-semibold text-center ${isToday ? 'text-teal-700 bg-teal-50/70' : ''}">
-                        <div>${d.shortName}</div>
-                        <div class="text-[10px] font-normal ${isToday ? 'text-teal-600 font-semibold' : 'text-slate-400'}">${d.shortDate}</div>
-                    </th>
-                `;
-            });
+            const headerRow = document.getElementById('weeklyGridHeader');
+            headerRow.innerHTML = `<th class="py-2.5 px-3 font-semibold text-slate-700 w-24">Turno</th>` +
+                weekDays.map(d => {
+                    const isToday = d.iso === todayIso;
+                    return `
+                        <th class="py-2.5 px-2 text-center font-semibold ${isToday ? 'bg-teal-50/80 text-teal-800' : 'text-slate-600'}">
+                            <div>${d.shortName}</div>
+                            <div class="text-[11px] font-normal ${isToday ? 'text-teal-600 font-semibold' : 'text-slate-400'}">${d.shortDate}</div>
+                        </th>
+                    `;
+                }).join('');
 
-            tbody.innerHTML = '';
+            const targetAuditoriums = selectedAudFilter === 'ALL' ? AUDITORIUMS : [selectedAudFilter];
+            const tbody = document.getElementById('weeklyGridBody');
 
-            SHIFTS.forEach(shift => {
-                const tr = document.createElement('tr');
-                let rowHtml = `<td class="py-3 px-3 font-semibold text-slate-700 bg-slate-50/50">${shift}</td>`;
+            tbody.innerHTML = SHIFTS.map(shift => {
+                const cells = weekDays.map(d => {
+                    const isToday = d.iso === todayIso;
+                    const slotBadges = targetAuditoriums.map(aud => {
+                        const found = bookings.find(b =>
+                            (b.auditorium || 'Auditório Principal') === aud &&
+                            b.date === d.iso &&
+                            b.shift === shift
+                        );
+                        const shortAud = aud === 'Auditório Principal' ? 'Principal' : 'Odonto';
 
-                weekDays.forEach(d => {
-                    const booking = bookings.find(b => b.date === d.iso && b.shift === shift);
-                    if (booking) {
-                        const badgeClass = SPECIALTY_BADGES[booking.specialty] || SPECIALTY_BADGES['Default'];
-                        rowHtml += `
-                            <td class="p-1.5 text-center align-middle">
-                                <button type="button" onclick="openModal('${booking.id}')" title="${booking.specialty} - ${booking.responsible}" class="w-full px-2 py-1.5 rounded-lg border text-[11px] font-semibold truncate block transition hover:opacity-80 ${badgeClass}">
-                                    ${booking.specialty}
+                        if (found) {
+                            const isPending = found.status === 'pending';
+                            const cardStyle = isPending
+                                ? 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
+                                : (aud === 'Auditório Principal'
+                                    ? 'bg-teal-50 border-teal-200 text-teal-900 hover:bg-teal-100'
+                                    : 'bg-sky-50 border-sky-200 text-sky-900 hover:bg-sky-100');
+                            const statusTag = isPending ? ' (Pend.)' : '';
+                            return `
+                                <button type="button" data-action="view-details" data-id="${found.id}" title="${aud}: ${escapeHtml(found.responsible)}${statusTag}" class="w-full text-left px-1.5 py-1 rounded-lg border text-[10px] leading-tight transition cursor-pointer ${cardStyle}">
+                                    <div class="font-bold truncate">${shortAud}${statusTag}</div>
+                                    <div class="truncate opacity-80">${escapeHtml(found.responsible)}</div>
                                 </button>
-                            </td>
-                        `;
-                    } else {
-                        rowHtml += `
-                            <td class="p-1.5 text-center align-middle">
-                                <button type="button" onclick="quickFillForm('${d.iso}', '${shift}')" title="Clique para reservar ${formatDateBR(d.iso)} (${shift})" class="w-full py-1.5 rounded-lg border border-dashed border-slate-200 text-slate-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/40 text-[10px] transition no-print">
-                                    Livre
+                            `;
+                        } else {
+                            return `
+                                <button type="button" onclick="quickFillSlot('${aud}', '${d.iso}', '${shift}')" title="Clique para reservar ${aud} em ${d.shortDate} (${shift})" class="w-full text-left px-1.5 py-1 rounded-lg border border-dashed border-slate-200 text-slate-400 hover:border-teal-400 hover:text-teal-700 hover:bg-teal-50/40 text-[10px] leading-tight transition cursor-pointer">
+                                    <span class="font-medium">${shortAud}:</span> Livre
                                 </button>
-                                <span class="hidden print:inline text-slate-300 text-[10px]">—</span>
-                            </td>
-                        `;
-                    }
-                });
-
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function quickFillForm(isoDate, shift) {
-            dateInput.value = isoDate;
-            updateDerivedDayLabel();
-            const radio = document.querySelector(`input[name="shift"][value="${shift}"]`);
-            if (radio) radio.checked = true;
-            checkInstantAvailability();
-            specialtySelect.focus();
-            showToast(`Data ${formatDateBR(isoDate)} (${shift}) selecionada.`, 'info');
-        }
-
-        function getFilteredBookings() {
-            const filterDate = document.getElementById('filterDate').value;
-            const filterShift = document.getElementById('filterShift').value;
-            const filterSpec = document.getElementById('filterSpecialty').value;
-
-            const hasActiveFilter = filterDate || filterShift || filterSpec;
-            document.getElementById('clearFiltersBtn').classList.toggle('hidden', !hasActiveFilter);
-
-            const knownSpecs = ['Odontologia', 'Medicina', 'Fisioterapia', 'Oftalmologia', 'Dermatologia'];
-
-            return bookings
-                .filter(b => {
-                    if (filterDate && b.date !== filterDate) return false;
-                    if (filterShift && b.shift !== filterShift) return false;
-                    if (filterSpec) {
-                        if (filterSpec === 'Outra') {
-                            if (knownSpecs.includes(b.specialty)) return false;
-                        } else if (b.specialty !== filterSpec) {
-                            return false;
+                            `;
                         }
-                    }
-                    return true;
-                })
-                .sort((a, b) => a.date.localeCompare(b.date));
+                    }).join('');
+
+                    return `<td class="p-1.5 align-top ${isToday ? 'bg-teal-50/20' : ''}">${`<div class="flex flex-col gap-1">${slotBadges}</div>`}</td>`;
+                }).join('');
+
+                return `
+                    <tr>
+                        <td class="py-2.5 px-3 font-semibold text-slate-700 bg-slate-50/50 align-middle">${shift}</td>
+                        ${cells}
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderBookingsTable() {
+            const filterDate = document.getElementById('filterDate').value;
+            const filterShift = document.getElementById('filterShift').value;
+            const filterAuditorium = document.getElementById('filterAuditorium').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            const hasActiveFilter = Boolean(filterDate || filterShift || filterAuditorium || filterStatus);
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            if (hasActiveFilter) {
+                clearFiltersBtn.classList.remove('hidden');
+            } else {
+                clearFiltersBtn.classList.add('hidden');
+            }
+
+            const filtered = bookings.filter(b => {
+                const aud = b.auditorium || 'Auditório Principal';
+                const status = b.status || 'authorized';
+                if (filterDate && b.date !== filterDate) return false;
+                if (filterShift && b.shift !== filterShift) return false;
+                if (filterAuditorium && aud !== filterAuditorium) return false;
+                if (filterStatus && status !== filterStatus) return false;
+                return true;
+            });
+
             const tbody = document.getElementById('bookingsTableBody');
             const emptyState = document.getElementById('emptyState');
-            const filtered = getFilteredBookings();
-
-            tbody.innerHTML = '';
 
             if (filtered.length === 0) {
+                tbody.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             }
 
             emptyState.classList.add('hidden');
+            tbody.innerHTML = filtered.map(b => {
+                const aud = b.auditorium || 'Auditório Principal';
+                const badgeClass = AUDITORIUM_BADGES[aud] || AUDITORIUM_BADGES['Default'];
+                const dayName = b.day || getDayNameFromISO(b.date);
+                const isPending = b.status === 'pending';
 
-            filtered.forEach(item => {
-                const badgeClass = SPECIALTY_BADGES[item.specialty] || SPECIALTY_BADGES['Default'];
-                const dayName = item.day || getDayNameFromISO(item.date);
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50/80 transition group';
+                const statusBadge = isPending
+                    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200"><i data-lucide="clock" class="w-3 h-3"></i> Pendente de Autorização</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Autorizada</span>`;
 
-                tr.innerHTML = `
-                    <td class="py-3.5 px-3 align-middle">
-                        <div class="font-semibold text-slate-900">${formatDateBR(item.date)}</div>
-                        <div class="text-xs text-slate-500 mt-0.5">
-                            <span class="font-medium text-teal-700">${item.shift}</span> • ${dayName}
-                        </div>
-                    </td>
-                    <td class="py-3.5 px-3 align-middle">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${badgeClass}">
-                            ${item.specialty}
-                        </span>
-                    </td>
-                    <td class="py-3.5 px-3 align-middle">
-                        <div class="font-medium text-slate-800">${item.responsible}</div>
-                        ${item.notes ? `<div class="text-xs text-slate-400 truncate max-w-[200px]" title="${item.notes}">${item.notes}</div>` : ''}
-                    </td>
-                    <td class="py-3.5 px-3 align-middle text-right no-print">
-                        <div class="inline-flex items-center gap-1">
-                            <button type="button" data-action="view-details" data-id="${item.id}" title="Ver Detalhes" class="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition cursor-pointer">
-                                <i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
-                            </button>
-                            <button type="button" data-action="delete-single" data-id="${item.id}" title="Excluir Reserva (Requer Senha)" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer">
-                                <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
-                            </button>
-                        </div>
-                    </td>
+                const approveBtn = isPending
+                    ? `<button type="button" data-action="approve-booking" data-id="${b.id}" title="Autorizar solicitação" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition cursor-pointer">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 pointer-events-none"></i>
+                            <span>Autorizar</span>
+                       </button>`
+                    : '';
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-3 align-top">
+                            <div class="font-semibold text-slate-800">${formatDateBR(b.date)}</div>
+                            <div class="text-xs text-slate-500">${dayName} • <span class="font-medium text-slate-700">${b.shift}</span></div>
+                        </td>
+                        <td class="py-3 px-3 align-top">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg border text-xs font-semibold ${badgeClass}">
+                                ${escapeHtml(aud)}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 align-top">
+                            <div class="font-medium text-slate-800">${escapeHtml(b.responsible)}</div>
+                            <div class="mt-1">${statusBadge}</div>
+                        </td>
+                        <td class="py-3 px-3 align-top text-right no-print">
+                            <div class="inline-flex items-center justify-end gap-1.5">
+                                ${approveBtn}
+                                <button type="button" data-action="view-details" data-id="${b.id}" title="Ver comprovante" class="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer">
+                                    <i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
+                                </button>
+                                <button type="button" data-action="delete-single" data-id="${b.id}" title="Excluir reserva" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer">
+                                    <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
-            });
+            }).join('');
 
             lucide.createIcons();
         }
 
-        ['filterDate', 'filterShift', 'filterSpecialty'].forEach(id => {
+        function renderAll() {
+            updateStats();
+            renderWeeklyGrid();
+            renderBookingsTable();
+            checkInstantAvailability();
+            lucide.createIcons();
+        }
+
+        document.getElementById('gridAuditoriumFilter').addEventListener('change', renderWeeklyGrid);
+
+        ['filterDate', 'filterShift', 'filterAuditorium', 'filterStatus'].forEach(id => {
             document.getElementById(id).addEventListener('change', renderBookingsTable);
         });
 
         function resetFilters() {
             document.getElementById('filterDate').value = '';
             document.getElementById('filterShift').value = '';
-            document.getElementById('filterSpecialty').value = '';
+            document.getElementById('filterAuditorium').value = '';
+            document.getElementById('filterStatus').value = '';
             renderBookingsTable();
         }
 
         // ==========================================
-        // 6. MODAIS, EXCLUSÃO COM SENHA E EXPORTAÇÃO
+        // 6. MODAIS, AUTORIZAÇÃO, EXCLUSÃO E EXPORTAÇÃO
         // ==========================================
         function openModal(id) {
             const item = bookings.find(b => b.id === id);
             if (!item) return;
 
             const dayName = item.day || getDayNameFromISO(item.date);
+            const isPending = item.status === 'pending';
             document.getElementById('modalDayDate').textContent = `${formatDateBR(item.date)} (${dayName})`;
             document.getElementById('modalShift').textContent = item.shift;
-            document.getElementById('modalSpecialty').textContent = item.specialty;
+            document.getElementById('modalAuditorium').textContent = item.auditorium || 'Auditório Principal';
             document.getElementById('modalResponsible').textContent = item.responsible;
+
+            const authEl = document.getElementById('modalAuthorizedBy');
+            const approveBtn = document.getElementById('modalApproveBtn');
+            if (isPending) {
+                authEl.textContent = 'Pendente de Autorização pelo Administrador';
+                authEl.className = 'font-semibold text-amber-700';
+                approveBtn.classList.remove('hidden');
+                approveBtn.onclick = () => {
+                    closeModal();
+                    requestApproveBooking(item.id);
+                };
+            } else {
+                authEl.textContent = `Autorizada por ${item.authorizedBy || 'Administrador'}`;
+                authEl.className = 'font-semibold text-emerald-700';
+                approveBtn.classList.add('hidden');
+                approveBtn.onclick = null;
+            }
 
             const notesContainer = document.getElementById('modalNotesContainer');
             if (item.notes) {
@@ -970,6 +1100,7 @@
             const modal = document.getElementById('detailsModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            lucide.createIcons();
         }
 
         function closeModal() {
@@ -978,18 +1109,127 @@
             modal.classList.remove('flex');
         }
 
-        function openDeleteModal(title, desc) {
-            document.getElementById('deleteModalTitle').textContent = title;
-            document.getElementById('deleteModalDesc').textContent = desc;
-            const pwdInput = document.getElementById('deletePasswordInput');
-            const pwdError = document.getElementById('deletePasswordError');
-            const toggleIcon = document.getElementById('togglePasswordIcon');
-            
+        // Fluxo de Autorização de Solicitação Pendente pelo Administrador
+        function requestApproveBooking(id) {
+            const item = bookings.find(b => b.id === id);
+            if (!item) return;
+
+            pendingApproveId = id;
+            const dayName = item.day || getDayNameFromISO(item.date);
+            document.getElementById('authBookingSummary').innerHTML = `
+                <div><strong>Auditório:</strong> ${escapeHtml(item.auditorium || 'Auditório Principal')}</div>
+                <div><strong>Data / Turno:</strong> ${formatDateBR(item.date)} (${dayName}) — ${item.shift}</div>
+                <div><strong>Solicitante:</strong> ${escapeHtml(item.responsible)}</div>
+            `;
+
+            const nameInput = document.getElementById('authAdminNameInput');
+            const pwdInput = document.getElementById('authBookingPasswordInput');
+            const errBox = document.getElementById('authBookingError');
+
+            nameInput.value = '';
             pwdInput.value = '';
             pwdInput.type = 'password';
-            pwdInput.classList.remove('border-rose-500', 'animate-shake');
-            pwdError.classList.add('hidden');
-            if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'eye');
+            document.getElementById('toggleAuthBookingPwdIcon').setAttribute('data-lucide', 'eye');
+            errBox.classList.add('hidden');
+
+            const modal = document.getElementById('authBookingModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+            setTimeout(() => nameInput.focus(), 50);
+        }
+
+        function closeAuthBookingModal() {
+            const modal = document.getElementById('authBookingModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pendingApproveId = null;
+        }
+
+        document.getElementById('toggleAuthBookingPwdBtn').addEventListener('click', () => {
+            const pwdInput = document.getElementById('authBookingPasswordInput');
+            const icon = document.getElementById('toggleAuthBookingPwdIcon');
+            const isHidden = pwdInput.type === 'password';
+            pwdInput.type = isHidden ? 'text' : 'password';
+            icon.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
+            lucide.createIcons();
+            pwdInput.focus();
+        });
+
+        document.getElementById('cancelAuthBookingBtn').addEventListener('click', closeAuthBookingModal);
+
+        document.getElementById('authBookingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const adminName = document.getElementById('authAdminNameInput').value.trim();
+            const pwdInput = document.getElementById('authBookingPasswordInput');
+            const errBox = document.getElementById('authBookingError');
+            const errText = document.getElementById('authBookingErrorText');
+
+            if (!adminName) {
+                errText.textContent = 'Informe o nome ou identificação do administrador.';
+                errBox.classList.remove('hidden');
+                errBox.classList.remove('animate-shake');
+                void errBox.offsetWidth;
+                errBox.classList.add('animate-shake');
+                document.getElementById('authAdminNameInput').focus();
+                return;
+            }
+
+            if (pwdInput.value.trim() !== ADMIN_DELETE_PASSWORD) {
+                errText.textContent = 'Senha incorreta! Autorização negada.';
+                errBox.classList.remove('hidden');
+                errBox.classList.remove('animate-shake');
+                void errBox.offsetWidth;
+                errBox.classList.add('animate-shake');
+                pwdInput.value = '';
+                pwdInput.focus();
+                return;
+            }
+
+            const idx = bookings.findIndex(b => b.id === pendingApproveId);
+            if (idx !== -1) {
+                bookings[idx].status = 'authorized';
+                bookings[idx].authorizedBy = adminName;
+                bookings[idx].authorizedAt = new Date().toISOString();
+                saveBookingsToStorage();
+                renderAll();
+                showToast(`Reserva autorizada com sucesso por ${adminName}!`, 'success');
+            }
+
+            closeAuthBookingModal();
+        });
+
+        // Fluxo de Exclusão com Senha Padrão
+        function requestDeleteSingle(id) {
+            const item = bookings.find(b => b.id === id);
+            if (!item) return;
+
+            deleteMode = 'single';
+            pendingDeleteId = id;
+            document.getElementById('deleteModalTitle').textContent = 'Excluir Reserva';
+            document.getElementById('deleteModalDesc').textContent = `Digite a senha administrativa para excluir a reserva de ${item.responsible} (${formatDateBR(item.date)} - ${item.shift}).`;
+            openDeleteModal();
+        }
+
+        function requestClearAllBookings() {
+            if (bookings.length === 0) {
+                showToast('Não há reservas cadastradas para limpar.', 'info');
+                return;
+            }
+            deleteMode = 'all';
+            pendingDeleteId = null;
+            document.getElementById('deleteModalTitle').textContent = 'Limpar Todas as Reservas';
+            document.getElementById('deleteModalDesc').textContent = `Esta ação removerá todas as ${bookings.length} reservas registradas. Digite a senha administrativa para confirmar.`;
+            openDeleteModal();
+        }
+
+        function openDeleteModal() {
+            const pwdInput = document.getElementById('deletePasswordInput');
+            const errBox = document.getElementById('deletePasswordError');
+            pwdInput.value = '';
+            pwdInput.type = 'password';
+            document.getElementById('togglePasswordIcon').setAttribute('data-lucide', 'eye');
+            errBox.classList.add('hidden');
 
             const modal = document.getElementById('deleteConfirmModal');
             modal.classList.remove('hidden');
@@ -998,37 +1238,43 @@
             setTimeout(() => pwdInput.focus(), 50);
         }
 
-        function requestDelete(id) {
-            const item = bookings.find(b => b.id === id);
-            if (!item) return;
-            deleteMode = 'single';
-            pendingDeleteId = id;
-            openDeleteModal(
-                'Excluir Reserva?',
-                `Informe a senha para remover a reserva de ${item.specialty} (${formatDateBR(item.date)} - ${item.shift}).`
-            );
-        }
-
-        function requestDeleteAll() {
-            if (bookings.length === 0) {
-                showToast('Não há reservas para excluir.', 'info');
-                return;
-            }
-            deleteMode = 'all';
-            pendingDeleteId = null;
-            openDeleteModal(
-                'Limpar Todas as Reservas?',
-                `Esta ação excluirá permanentemente todas as ${bookings.length} reservas registradas.`
-            );
-        }
-
         function closeDeleteModal() {
-            deleteMode = null;
-            pendingDeleteId = null;
             const modal = document.getElementById('deleteConfirmModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            deleteMode = null;
+            pendingDeleteId = null;
         }
+
+        document.getElementById('deletePasswordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pwdInput = document.getElementById('deletePasswordInput');
+            const errBox = document.getElementById('deletePasswordError');
+
+            if (pwdInput.value.trim() !== ADMIN_DELETE_PASSWORD) {
+                errBox.classList.remove('hidden');
+                errBox.classList.remove('animate-shake');
+                void errBox.offsetWidth;
+                errBox.classList.add('animate-shake');
+                pwdInput.value = '';
+                pwdInput.focus();
+                return;
+            }
+
+            if (deleteMode === 'single' && pendingDeleteId) {
+                bookings = bookings.filter(b => b.id !== pendingDeleteId);
+                saveBookingsToStorage();
+                renderAll();
+                showToast('Reserva excluída com sucesso.', 'success');
+            } else if (deleteMode === 'all') {
+                bookings = [];
+                saveBookingsToStorage();
+                renderAll();
+                showToast('Todas as reservas foram excluídas.', 'success');
+            }
+
+            closeDeleteModal();
+        });
 
         // Alternar visualização da senha no modal
         document.getElementById('togglePasswordVisibilityBtn').addEventListener('click', () => {
@@ -1043,100 +1289,68 @@
 
         document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
 
-        // Delegação de eventos global para os botões de ação (Excluir, Limpar Todas, Detalhes e Fechar Modais)
+        // Delegação de eventos global para os botões de ação (Autorizar, Excluir, Limpar Todas, Detalhes e Fechar Modais)
         document.addEventListener('click', (e) => {
             const actionBtn = e.target.closest('[data-action]');
             if (actionBtn) {
-                const action = actionBtn.dataset.action;
-                const id = actionBtn.dataset.id;
+                const action = actionBtn.getAttribute('data-action');
+                const id = actionBtn.getAttribute('data-id');
 
-                if (action === 'delete-single' && id) {
-                    e.preventDefault();
-                    requestDelete(id);
-                    return;
-                }
-                if (action === 'delete-all') {
-                    e.preventDefault();
-                    requestDeleteAll();
-                    return;
-                }
                 if (action === 'view-details' && id) {
-                    e.preventDefault();
                     openModal(id);
-                    return;
+                } else if (action === 'approve-booking' && id) {
+                    requestApproveBooking(id);
+                } else if (action === 'delete-single' && id) {
+                    requestDeleteSingle(id);
+                } else if (action === 'delete-all') {
+                    requestClearAllBookings();
                 }
+                return;
             }
 
-            if (e.target === document.getElementById('detailsModal')) closeModal();
-            if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
+            // Fecha modais ao clicar no backdrop escuro
+            if (e.target.id === 'detailsModal') closeModal();
+            if (e.target.id === 'authBookingModal') closeAuthBookingModal();
+            if (e.target.id === 'deleteConfirmModal') closeDeleteModal();
         });
 
-        // Fechar modais com a tecla ESC
+        // Fecha modais com a tecla ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeModal();
+                closeAuthBookingModal();
                 closeDeleteModal();
             }
         });
 
-        document.getElementById('deletePasswordForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const pwdInput = document.getElementById('deletePasswordInput');
-            const pwdError = document.getElementById('deletePasswordError');
-            const enteredPassword = pwdInput.value.trim();
-
-            if (enteredPassword !== ADMIN_DELETE_PASSWORD) {
-                pwdInput.value = '';
-                pwdInput.classList.add('border-rose-500');
-                pwdInput.classList.remove('animate-shake');
-                void pwdInput.offsetWidth; // Reinicia a animação CSS
-                pwdInput.classList.add('animate-shake');
-                pwdError.classList.remove('hidden');
-                lucide.createIcons();
-                pwdInput.focus();
-                showToast('Senha incorreta! Exclusão não autorizada.', 'error');
-                return;
-            }
-
-            if (deleteMode === 'single' && pendingDeleteId) {
-                bookings = bookings.filter(b => b.id !== pendingDeleteId);
-                saveBookingsToStorage();
-                renderAll();
-                closeDeleteModal();
-                showToast('Reserva excluída com sucesso!', 'success');
-            } else if (deleteMode === 'all') {
-                bookings = [];
-                saveBookingsToStorage();
-                renderAll();
-                closeDeleteModal();
-                showToast('Todas as reservas foram excluídas com sucesso!', 'success');
-            }
-        });
-
-        // Exportar cronograma para CSV (Excel)
+        // Exportar CSV
         function exportCSV() {
             if (bookings.length === 0) {
-                showToast('Não há reservas para exportar.', 'error');
+                showToast('Nenhuma reserva disponível para exportar.', 'info');
                 return;
             }
 
-            const headers = ['Data', 'Dia da Semana', 'Turno', 'Especialidade', 'Responsável', 'Observações'];
+            const headers = ['Data', 'Dia da Semana', 'Turno', 'Auditório', 'Responsável', 'Status', 'Autorizado Por', 'Observações'];
             const rows = bookings.map(b => [
-                `"${formatDateBR(b.date)}"`,
-                `"${b.day || getDayNameFromISO(b.date)}"`,
-                `"${b.shift}"`,
-                `"${b.specialty}"`,
-                `"${b.responsible.replace(/"/g, '""')}"`,
-                `"${(b.notes || '').replace(/"/g, '""')}"`
+                formatDateBR(b.date),
+                b.day || getDayNameFromISO(b.date),
+                b.shift,
+                b.auditorium || 'Auditório Principal',
+                b.responsible,
+                b.status === 'pending' ? 'Pendente de Autorização' : 'Autorizada',
+                b.authorizedBy || '-',
+                (b.notes || '').replace(/\r?\n|\r/g, ' ')
             ]);
 
-            const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+            const csvContent = '\uFEFF' + [headers, ...rows]
+                .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';'))
+                .join('\n');
+
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            
             const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `reservas_auditorio_${getTodayISO()}.csv`);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `reservas_auditorios_${getTodayISO()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1145,7 +1359,18 @@
             showToast('Arquivo CSV exportado com sucesso!', 'success');
         }
 
-        // Sistema de Notificação Toast
+        // ==========================================
+        // 7. NOTIFICAÇÕES TOAST & UTILITÁRIOS
+        // ==========================================
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -1155,37 +1380,37 @@
                 error: 'bg-rose-900 text-white border-rose-700',
                 info: 'bg-slate-900 text-white border-slate-700'
             };
-
             const icons = {
-                success: 'check-circle-2',
+                success: 'check-circle',
                 error: 'alert-circle',
                 info: 'info'
             };
 
-            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-lg text-xs font-medium transition-all duration-300 ${styles[type] || styles.info}`;
             toast.innerHTML = `
-                <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0"></i>
-                <span class="flex-1">${message}</span>
+                <i data-lucide="${icons[type] || icons.info}" class="w-4 h-4 shrink-0"></i>
+                <span class="flex-1">${escapeHtml(message)}</span>
             `;
 
             container.appendChild(toast);
             lucide.createIcons();
 
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            });
-
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 3500);
+            }, 3800);
         }
 
         // ==========================================
-        // 7. BOOTSTRAP DA PÁGINA
+        // 8. INICIALIZAÇÃO
         // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            const now = new Date();
+            const printDateEl = document.getElementById('printDate');
+            if (printDateEl) {
+                printDateEl.textContent = `Emitido em ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+            }
+
             loadBookings();
             renderAll();
         });
