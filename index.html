@@ -16,10 +16,6 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Prevenir scroll ao desenhar no canvas em dispositivos touch */
-        #signatureCanvas {
-            touch-action: none;
-        }
         /* Estilos específicos para impressão */
         @media print {
             .no-print {
@@ -140,26 +136,16 @@
                 </div>
 
                 <form id="bookingForm" class="space-y-4" novalidate>
-                    <!-- Dia da Semana e Data -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="daySelect" class="block text-sm font-medium text-slate-700 mb-1">Dia da Semana *</label>
-                            <select id="daySelect" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
-                                <option value="" disabled selected>Selecione o dia...</option>
-                                <option value="Segunda-feira">Segunda-feira</option>
-                                <option value="Terça-feira">Terça-feira</option>
-                                <option value="Quarta-feira">Quarta-feira</option>
-                                <option value="Quinta-feira">Quinta-feira</option>
-                                <option value="Sexta-feira">Sexta-feira</option>
-                                <option value="Sábado">Sábado</option>
-                                <option value="Domingo">Domingo</option>
-                            </select>
+                    <!-- Data da Reserva (Dia da semana derivado automaticamente) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="dateInput" class="block text-sm font-medium text-slate-700">Data da Reserva *</label>
+                            <span id="derivedDayBadge" class="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-lg">
+                                <i data-lucide="calendar" class="w-3 h-3"></i>
+                                <span id="derivedDayText">—</span>
+                            </span>
                         </div>
-
-                        <div>
-                            <label for="dateInput" class="block text-sm font-medium text-slate-700 mb-1">Data Específica *</label>
-                            <input type="date" id="dateInput" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
-                        </div>
+                        <input type="date" id="dateInput" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
                     </div>
 
                     <!-- Seleção de Turno (Botões Radio Estilizados) -->
@@ -232,25 +218,6 @@
                         <textarea id="notesInput" rows="2" placeholder="Ex: Projetor, 2 microfones sem fio, 60 cadeiras..." class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"></textarea>
                     </div>
 
-                    <!-- Assinatura Digital Canvas -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label class="block text-sm font-medium text-slate-700">Assinatura Digital do Responsável *</label>
-                            <button type="button" id="clearSignatureBtn" class="inline-flex items-center gap-1 text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg transition">
-                                <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
-                                Limpar
-                            </button>
-                        </div>
-                        <div id="canvasWrapper" class="relative w-full h-36 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-teal-400 transition">
-                            <canvas id="signatureCanvas" class="w-full h-full cursor-crosshair block"></canvas>
-                            <div id="signaturePlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-slate-400 select-none">
-                                <i data-lucide="pen-tool" class="w-5 h-5 mb-1 opacity-60"></i>
-                                <span class="text-xs">Assine aqui com o mouse ou dedo</span>
-                            </div>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-1">A assinatura confirma a ciência das normas de uso do auditório.</p>
-                    </div>
-
                     <!-- Botão de Submissão -->
                     <div class="pt-2">
                         <button type="submit" class="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow transition focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
@@ -264,38 +231,34 @@
             <!-- Coluna Direita: Grade Visual & Lista de Reservas -->
             <section class="lg:col-span-7 space-y-6 print-full-width">
                 
-                <!-- Grade Semanal Visual (Matriz Dias x Turnos) -->
+                <!-- Grade Semanal Visual (Matriz Datas da Semana x Turnos) -->
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 print-break-inside">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
                         <div>
                             <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="layout-grid" class="w-5 h-5 text-teal-600"></i>
                                 Grade Semanal de Ocupação
                             </h2>
-                            <p class="text-xs text-slate-500">Visão rápida de horários livres e ocupados na semana</p>
+                            <p class="text-xs text-slate-500">Ocupação por data e turno na semana selecionada</p>
                         </div>
-                        <div class="flex items-center gap-3 text-xs">
-                            <span class="inline-flex items-center gap-1.5 text-slate-600">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Livre
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 text-slate-600">
-                                <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span> Reservado
-                            </span>
+                        <div class="flex items-center gap-2 no-print">
+                            <button type="button" onclick="changeGridWeek(-7)" title="Semana anterior" class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </button>
+                            <button type="button" onclick="resetGridWeek()" class="px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
+                                Semana Atual
+                            </button>
+                            <button type="button" onclick="changeGridWeek(7)" title="Próxima semana" class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[600px]">
+                        <table class="w-full text-left border-collapse min-w-[620px]">
                             <thead>
-                                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-y border-slate-200">
-                                    <th class="py-2.5 px-3 font-semibold w-24">Turno</th>
-                                    <th class="py-2.5 px-2 font-semibold text-center">Seg</th>
-                                    <th class="py-2.5 px-2 font-semibold text-center">Ter</th>
-                                    <th class="py-2.5 px-2 font-semibold text-center">Qua</th>
-                                    <th class="py-2.5 px-2 font-semibold text-center">Qui</th>
-                                    <th class="py-2.5 px-2 font-semibold text-center">Sex</th>
-                                    <th class="py-2.5 px-2 font-semibold text-center">Sáb</th>
-                                    <th class="py-2.5 px-2 font-semibold text-center">Dom</th>
+                                <tr id="weeklyGridHeader" class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-y border-slate-200">
+                                    <!-- Cabeçalho dinâmico com dias e datas da semana -->
                                 </tr>
                             </thead>
                             <tbody id="weeklyGridBody" class="divide-y divide-slate-100 text-xs">
@@ -313,29 +276,25 @@
                                 <i data-lucide="list-checks" class="w-5 h-5 text-teal-600"></i>
                                 Reservas Confirmadas
                             </h2>
-                            <p class="text-xs text-slate-500">Consulte responsáveis, observações e assinaturas</p>
+                            <p class="text-xs text-slate-500">Consulte datas, responsáveis e observações</p>
                         </div>
 
-                        <!-- Botão limpar tudo (opcional, discreto) -->
-                        <button id="clearFiltersBtn" onclick="resetFilters()" class="hidden text-xs font-medium text-teal-600 hover:text-teal-700 self-start sm:self-auto no-print">
-                            Limpar filtros
-                        </button>
+                        <div class="flex items-center gap-3 self-start sm:self-auto no-print">
+                            <button id="clearFiltersBtn" onclick="resetFilters()" class="hidden text-xs font-medium text-teal-600 hover:text-teal-700">
+                                Limpar filtros
+                            </button>
+                            <button id="clearAllBookingsBtn" onclick="requestDeleteAll()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                Limpar Todas
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Barra de Filtros -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 no-print">
                         <div>
-                            <label for="filterDay" class="sr-only">Filtrar por Dia</label>
-                            <select id="filterDay" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
-                                <option value="">Todos os Dias</option>
-                                <option value="Segunda-feira">Segunda-feira</option>
-                                <option value="Terça-feira">Terça-feira</option>
-                                <option value="Quarta-feira">Quarta-feira</option>
-                                <option value="Quinta-feira">Quinta-feira</option>
-                                <option value="Sexta-feira">Sexta-feira</option>
-                                <option value="Sábado">Sábado</option>
-                                <option value="Domingo">Domingo</option>
-                            </select>
+                            <label for="filterDate" class="sr-only">Filtrar por Data</label>
+                            <input type="date" id="filterDate" title="Filtrar por data específica" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
                         </div>
                         <div>
                             <label for="filterShift" class="sr-only">Filtrar por Turno</label>
@@ -365,10 +324,9 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                    <th class="py-3 px-3">Dia / Turno</th>
+                                    <th class="py-3 px-3">Data / Turno</th>
                                     <th class="py-3 px-3">Especialidade</th>
                                     <th class="py-3 px-3">Responsável</th>
-                                    <th class="py-3 px-3 text-center">Assinatura</th>
                                     <th class="py-3 px-3 text-right no-print">Ações</th>
                                 </tr>
                             </thead>
@@ -380,24 +338,12 @@
 
                     <!-- Estado Vazio -->
                     <div id="emptyState" class="hidden py-12 text-center">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mb-3">
-                            <i data-lucide="calendar-x" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-sm font-semibold text-slate-800">Nenhuma reserva encontrada</h3>
-                        <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Não há agendamentos registrados para os filtros selecionados ou a agenda está livre.</p>
-                    </div>
-                </div>
-
-            </section>
-        </div>
-    </main>
-
-    <!-- Modal para Visualizar Detalhes e Assinatura Ampliada -->
-    <div id="signatureModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
+    <!-- Modal para Visualizar Detalhes da Reserva -->
+    <div id="detailsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/70">
                 <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="file-signature" class="w-5 h-5 text-teal-600"></i>
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-teal-600"></i>
                     Comprovante de Reserva
                 </h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition">
@@ -408,7 +354,7 @@
             <div class="p-5 space-y-4">
                 <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs">
                     <div>
-                        <span class="text-slate-400 block">Dia / Data</span>
+                        <span class="text-slate-400 block">Data / Dia</span>
                         <span id="modalDayDate" class="font-semibold text-slate-800"></span>
                     </div>
                     <div>
@@ -426,15 +372,8 @@
                 </div>
 
                 <div id="modalNotesContainer" class="text-xs">
-                    <span class="text-slate-500 font-medium block mb-1">Observações:</span>
+                    <span class="text-slate-500 font-medium block mb-1">Observações / Recursos:</span>
                     <p id="modalNotes" class="text-slate-700 bg-amber-50/60 border border-amber-100 rounded-xl p-2.5"></p>
-                </div>
-
-                <div>
-                    <span class="text-xs font-medium text-slate-500 block mb-1.5">Assinatura Digital Registrada:</span>
-                    <div class="border border-slate-200 rounded-xl bg-white p-3 flex items-center justify-center">
-                        <img id="modalSignatureImg" src="" alt="Assinatura do Responsável" class="max-h-36 w-auto object-contain">
-                    </div>
                 </div>
             </div>
 
@@ -446,22 +385,37 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão (Substitui window.confirm) -->
+    <!-- Modal de Confirmação de Exclusão com Senha Padrão -->
     <div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-5 text-center">
-            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="trash-2" class="w-6 h-6"></i>
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-5">
+            <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <h3 id="deleteModalTitle" class="text-base font-bold text-slate-900">Confirmar Exclusão</h3>
+                <p id="deleteModalDesc" class="text-xs text-slate-500 mt-1.5 mb-4">Digite a senha administrativa para autorizar a exclusão.</p>
             </div>
-            <h3 class="text-base font-bold text-slate-900">Cancelar Reserva?</h3>
-            <p class="text-xs text-slate-500 mt-1.5 mb-5">Esta ação removerá o agendamento da grade e liberará o horário no auditório.</p>
-            <div class="flex items-center gap-3">
-                <button onclick="closeDeleteModal()" class="flex-1 py-2.5 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
-                    Manter
-                </button>
-                <button id="confirmDeleteBtn" class="flex-1 py-2.5 px-4 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition">
-                    Sim, Excluir
-                </button>
-            </div>
+
+            <form id="deletePasswordForm" class="space-y-3">
+                <div>
+                    <label for="deletePasswordInput" class="block text-xs font-medium text-slate-700 mb-1">Senha de Administrador *</label>
+                    <input type="password" id="deletePasswordInput" autocomplete="off" placeholder="Digite a senha..." class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition">
+                    <p id="deletePasswordError" class="hidden text-xs font-medium text-rose-600 mt-1.5 flex items-center gap-1">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span>Senha incorreta. Tente novamente.</span>
+                    </p>
+                    <p class="text-[11px] text-slate-400 mt-1.5">Senha padrão: <code class="font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">admin123</code></p>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 px-4 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition">
+                        Confirmar Exclusão
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -469,11 +423,13 @@
         // ==========================================
         // 1. DADOS E ESTADO DA APLICAÇÃO
         // ==========================================
-        const STORAGE_KEY = 'auditorio_reservas_v1';
+        const STORAGE_KEY = 'auditorio_reservas_v2';
+        const ADMIN_DELETE_PASSWORD = 'admin123';
         const DAYS_OF_WEEK = [
-            'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
-            'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'
+            'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
+            'Quinta-feira', 'Sexta-feira', 'Sábado'
         ];
+        const SHORT_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         const SHIFTS = ['Manhã', 'Tarde', 'Noite'];
 
         // Cores por especialidade para tags visuais
@@ -487,144 +443,94 @@
         };
 
         let bookings = [];
+        let deleteMode = null; // 'single' | 'all'
         let pendingDeleteId = null;
+        let currentWeekOffset = 0; // Deslocamento em dias para a grade semanal
 
         // ==========================================
-        // 2. CANVAS DE ASSINATURA DIGITAL
+        // 2. UTILITÁRIOS DE DATA
         // ==========================================
-        const canvas = document.getElementById('signatureCanvas');
-        const ctx = canvas.getContext('2d');
-        const placeholder = document.getElementById('signaturePlaceholder');
-        let isDrawing = false;
-        let hasSignature = false;
+        function getTodayISO() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            return new Date(now - offset).toISOString().split('T')[0];
+        }
 
-        function resizeCanvas() {
-            const wrapper = document.getElementById('canvasWrapper');
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            
-            // Salva o conteúdo atual se já houver assinatura
-            const tempImage = hasSignature ? canvas.toDataURL() : null;
+        function addDaysISO(baseISO, daysToAdd) {
+            const [y, m, d] = baseISO.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d + daysToAdd);
+            const yr = dateObj.getFullYear();
+            const mo = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const da = String(dateObj.getDate()).padStart(2, '0');
+            return `${yr}-${mo}-${da}`;
+        }
 
-            canvas.width = wrapper.clientWidth * ratio;
-            canvas.height = wrapper.clientHeight * ratio;
-            ctx.scale(ratio, ratio);
+        function getDayNameFromISO(dateStr) {
+            if (!dateStr) return '—';
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const dateObj = new Date(year, month - 1, day);
+            return DAYS_OF_WEEK[dateObj.getDay()];
+        }
 
-            // Estilo do traço
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.lineWidth = 2.4;
-            ctx.strokeStyle = '#0f172a'; // slate-900
+        function formatDateBR(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
 
-            if (tempImage) {
-                const img = new Image();
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0, wrapper.clientWidth, wrapper.clientHeight);
-                };
-                img.src = tempImage;
+        function formatShortDateBR(dateStr) {
+            if (!dateStr) return '';
+            const [, m, d] = dateStr.split('-');
+            return `${d}/${m}`;
+        }
+
+        // Retorna array de 7 datas ISO (Segunda a Domingo) com base no offset atual
+        function getWeekDatesISO(offsetDays = 0) {
+            const todayISO = addDaysISO(getTodayISO(), offsetDays);
+            const [y, m, d] = todayISO.split('-').map(Number);
+            const refDate = new Date(y, m - 1, d);
+            const dayOfWeek = refDate.getDay(); // 0 = Dom, 1 = Seg...
+            const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const mondayISO = addDaysISO(todayISO, diffToMonday);
+
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                dates.push(addDaysISO(mondayISO, i));
             }
+            return dates;
         }
-
-        function getCoordinates(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            hasSignature = true;
-            placeholder.classList.add('hidden');
-            const { x, y } = getCoordinates(e);
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            if (e.cancelable) e.preventDefault();
-            const { x, y } = getCoordinates(e);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-        }
-
-        function stopDrawing() {
-            if (!isDrawing) return;
-            isDrawing = false;
-            ctx.closePath();
-        }
-
-        function clearSignature() {
-            const wrapper = document.getElementById('canvasWrapper');
-            ctx.clearRect(0, 0, wrapper.clientWidth, wrapper.clientHeight);
-            hasSignature = false;
-            placeholder.classList.remove('hidden');
-        }
-
-        // Eventos Mouse & Touch no Canvas
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        window.addEventListener('mouseup', stopDrawing);
-
-        canvas.addEventListener('touchstart', startDrawing, { passive: false });
-        canvas.addEventListener('touchmove', draw, { passive: false });
-        canvas.addEventListener('touchend', stopDrawing);
-
-        document.getElementById('clearSignatureBtn').addEventListener('click', clearSignature);
 
         // ==========================================
         // 3. INICIALIZAÇÃO E DADOS EXEMPLO
         // ==========================================
-        function createSampleSignatureDataURL(name) {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 260;
-            tempCanvas.height = 90;
-            const tCtx = tempCanvas.getContext('2d');
-            tCtx.font = 'italic 24px Georgia, serif';
-            tCtx.fillStyle = '#1e293b';
-            tCtx.fillText(name, 20, 52);
-            tCtx.beginPath();
-            tCtx.moveTo(20, 62);
-            tCtx.quadraticCurveTo(110, 56, 210, 64);
-            tCtx.strokeStyle = '#0d9488';
-            tCtx.lineWidth = 1.5;
-            tCtx.stroke();
-            return tempCanvas.toDataURL();
-        }
-
         function loadBookings() {
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     bookings = JSON.parse(stored);
                 } else {
-                    // Dados iniciais de demonstração
-                    const today = new Date().toISOString().split('T')[0];
+                    const today = getTodayISO();
+                    const plusTwo = addDaysISO(today, 2);
                     bookings = [
                         {
                             id: 'demo-1',
-                            day: 'Segunda-feira',
                             date: today,
+                            day: getDayNameFromISO(today),
                             shift: 'Manhã',
                             specialty: 'Medicina',
                             isOtherSpecialty: false,
                             responsible: 'Dr. Carlos Eduardo Mendes',
-                            notes: 'Simpósio de Clínica Médica — Necessário projetor e 2 microfones.',
-                            signature: createSampleSignatureDataURL('Dr. Carlos E. Mendes')
+                            notes: 'Simpósio de Clínica Médica — Necessário projetor e 2 microfones.'
                         },
                         {
                             id: 'demo-2',
-                            day: 'Quarta-feira',
-                            date: today,
+                            date: plusTwo,
+                            day: getDayNameFromISO(plusTwo),
                             shift: 'Tarde',
                             specialty: 'Odontologia',
                             isOtherSpecialty: false,
                             responsible: 'Dra. Mariana Albuquerque',
-                            notes: 'Aula magna de Implantodontia.',
-                            signature: createSampleSignatureDataURL('Dra. Mariana A.')
+                            notes: 'Aula magna de Implantodontia.'
                         }
                     ];
                     saveBookingsToStorage();
@@ -646,24 +552,23 @@
         // ==========================================
         // 4. LÓGICA DO FORMULÁRIO E CONFLITOS
         // ==========================================
-        const daySelect = document.getElementById('daySelect');
         const dateInput = document.getElementById('dateInput');
+        const derivedDayText = document.getElementById('derivedDayText');
         const specialtySelect = document.getElementById('specialtySelect');
         const otherSpecialtyContainer = document.getElementById('otherSpecialtyContainer');
         const otherSpecialtyInput = document.getElementById('otherSpecialtyInput');
         const availabilityHint = document.getElementById('availabilityHint');
 
-        // Define data padrão para hoje
-        dateInput.value = new Date().toISOString().split('T')[0];
+        function updateDerivedDayDisplay() {
+            derivedDayText.textContent = getDayNameFromISO(dateInput.value);
+        }
 
-        // Sincroniza automaticamente o dia da semana ao escolher uma data
+        // Define data padrão para hoje e atualiza o dia da semana derivado
+        dateInput.value = getTodayISO();
+        updateDerivedDayDisplay();
+
         dateInput.addEventListener('change', () => {
-            if (!dateInput.value) return;
-            const [year, month, day] = dateInput.value.split('-').map(Number);
-            const dateObj = new Date(year, month - 1, day);
-            // getDay(): 0 = Domingo, 1 = Segunda...
-            const mapDay = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-            daySelect.value = mapDay[dateObj.getDay()];
+            updateDerivedDayDisplay();
             checkRealTimeConflict();
         });
 
@@ -680,34 +585,33 @@
             }
         });
 
-        // Verifica conflito em tempo real ao mudar dia ou turno
-        daySelect.addEventListener('change', checkRealTimeConflict);
+        // Verifica conflito em tempo real ao mudar turno
         document.querySelectorAll('input[name="shift"]').forEach(radio => {
             radio.addEventListener('change', checkRealTimeConflict);
         });
 
-        function findConflict(day, shift) {
-            return bookings.find(b => b.day === day && b.shift === shift);
+        function findConflict(date, shift) {
+            return bookings.find(b => b.date === date && b.shift === shift);
         }
 
         function checkRealTimeConflict() {
-            const selectedDay = daySelect.value;
+            const selectedDate = dateInput.value;
             const selectedShiftEl = document.querySelector('input[name="shift"]:checked');
             
-            if (!selectedDay || !selectedShiftEl) {
+            if (!selectedDate || !selectedShiftEl) {
                 availabilityHint.classList.add('hidden');
                 return;
             }
 
-            const conflict = findConflict(selectedDay, selectedShiftEl.value);
+            const conflict = findConflict(selectedDate, selectedShiftEl.value);
             availabilityHint.classList.remove('hidden');
 
             if (conflict) {
                 availabilityHint.className = 'mt-2 text-xs rounded-lg px-3 py-2 flex items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200';
-                availabilityHint.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span>Conflito: Já reservado para <strong>${conflict.specialty}</strong> (${conflict.responsible}).</span>`;
+                availabilityHint.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span>Conflito em ${formatDateBR(selectedDate)}: Já reservado para <strong>${conflict.specialty}</strong> (${conflict.responsible}).</span>`;
             } else {
                 availabilityHint.className = 'mt-2 text-xs rounded-lg px-3 py-2 flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200';
-                availabilityHint.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span>Horário disponível para reserva!</span>`;
+                availabilityHint.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span>Horário disponível em ${formatDateBR(selectedDate)} (${getDayNameFromISO(selectedDate)})!</span>`;
             }
             lucide.createIcons();
         }
@@ -716,8 +620,8 @@
         document.getElementById('bookingForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const day = daySelect.value;
             const date = dateInput.value;
+            const day = getDayNameFromISO(date);
             const shiftEl = document.querySelector('input[name="shift"]:checked');
             const shift = shiftEl ? shiftEl.value : '';
             const rawSpecialty = specialtySelect.value;
@@ -727,49 +631,39 @@
             const notes = document.getElementById('notesInput').value.trim();
 
             // Validações
-            if (!day || !date || !shift || !specialty || !responsible) {
+            if (!date || !shift || !specialty || !responsible) {
                 showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
                 return;
             }
 
-            if (!hasSignature) {
-                showToast('A assinatura digital do responsável é obrigatória.', 'error');
-                document.getElementById('canvasWrapper').classList.add('border-rose-400', 'bg-rose-50/30');
-                setTimeout(() => {
-                    document.getElementById('canvasWrapper').classList.remove('border-rose-400', 'bg-rose-50/30');
-                }, 2000);
-                return;
-            }
-
-            // Bloqueio de conflito de horário (mesmo dia e turno)
-            const conflict = findConflict(day, shift);
+            // Bloqueio de conflito de horário (mesma data e mesmo turno)
+            const conflict = findConflict(date, shift);
             if (conflict) {
-                showToast(`Conflito de horário! ${day} (${shift}) já está reservado para ${conflict.specialty}.`, 'error');
+                showToast(`Conflito de horário! ${formatDateBR(date)} (${shift}) já está reservado para ${conflict.specialty}.`, 'error');
                 return;
             }
 
             const newBooking = {
                 id: 'res-' + Date.now(),
-                day,
                 date,
+                day,
                 shift,
                 specialty,
                 isOtherSpecialty: isOther,
                 responsible,
-                notes,
-                signature: canvas.toDataURL('image/png')
+                notes
             };
 
             bookings.push(newBooking);
             saveBookingsToStorage();
             renderAll();
 
-            // Resetar formulário
+            // Resetar formulário mantendo data atual
             e.target.reset();
-            dateInput.value = new Date().toISOString().split('T')[0];
+            dateInput.value = date;
+            updateDerivedDayDisplay();
             otherSpecialtyContainer.classList.add('hidden');
             availabilityHint.classList.add('hidden');
-            clearSignature();
 
             showToast('Reserva registrada com sucesso!', 'success');
         });
@@ -777,12 +671,6 @@
         // ==========================================
         // 5. RENDERIZAÇÃO DA GRADE, TABELA E ESTATÍSTICAS
         // ==========================================
-        function formatDateBR(dateStr) {
-            if (!dateStr) return '';
-            const [y, m, d] = dateStr.split('-');
-            return `${d}/${m}/${y}`;
-        }
-
         function getBadgeClass(specialty) {
             return SPECIALTY_BADGES[specialty] || SPECIALTY_BADGES['default'];
         }
@@ -794,42 +682,64 @@
             document.getElementById('statNoite').textContent = bookings.filter(b => b.shift === 'Noite').length;
         }
 
-        function renderWeeklyGrid() {
-            const gridBody = document.getElementById('weeklyGridBody');
-            gridBody.innerHTML = '';
+        function changeGridWeek(daysDelta) {
+            currentWeekOffset += daysDelta;
+            renderWeeklyGrid();
+        }
 
+        function resetGridWeek() {
+            currentWeekOffset = 0;
+            renderWeeklyGrid();
+        }
+
+        function renderWeeklyGrid() {
+            const weekDates = getWeekDatesISO(currentWeekOffset);
+            const todayISO = getTodayISO();
+            const gridHeader = document.getElementById('weeklyGridHeader');
+            const gridBody = document.getElementById('weeklyGridBody');
+
+            // Renderizar Cabeçalho com Dia e Data
+            gridHeader.innerHTML = `<th class="py-2.5 px-3 font-semibold w-24">Turno</th>`;
+            weekDates.forEach(dateStr => {
+                const [y, m, d] = dateStr.split('-').map(Number);
+                const dayIdx = new Date(y, m - 1, d).getDay();
+                const isToday = dateStr === todayISO;
+                gridHeader.innerHTML += `
+                    <th class="py-2 px-1.5 font-semibold text-center ${isToday ? 'bg-teal-50/80 text-teal-800' : ''}">
+                        <div>${SHORT_DAYS[dayIdx]}</div>
+                        <div class="text-[10px] font-normal ${isToday ? 'text-teal-700 font-semibold' : 'text-slate-400'}">${formatShortDateBR(dateStr)}</div>
+                    </th>
+                `;
+            });
+
+            // Renderizar Corpo da Grade
+            gridBody.innerHTML = '';
             SHIFTS.forEach(shift => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/60 transition';
 
-                // Coluna do Turno
                 const tdShift = document.createElement('td');
                 tdShift.className = 'py-3 px-3 font-semibold text-slate-700 bg-slate-50/50 border-r border-slate-100';
-                tdShift.innerHTML = `
-                    <div class="flex items-center gap-1.5">
-                        <span>${shift}</span>
-                    </div>
-                `;
+                tdShift.innerHTML = `<span>${shift}</span>`;
                 tr.appendChild(tdShift);
 
-                // Colunas dos Dias
-                DAYS_OF_WEEK.forEach(day => {
+                weekDates.forEach(dateStr => {
                     const td = document.createElement('td');
                     td.className = 'p-1.5 text-center align-middle';
 
-                    const booking = bookings.find(b => b.day === day && b.shift === shift);
+                    const booking = bookings.find(b => b.date === dateStr && b.shift === shift);
 
                     if (booking) {
                         const badgeStyle = getBadgeClass(booking.specialty);
                         td.innerHTML = `
-                            <button onclick="openModal('${booking.id}')" title="Clique para ver detalhes de ${booking.responsible}" class="w-full p-2 rounded-xl border ${badgeStyle} text-left transition hover:shadow-xs cursor-pointer group">
+                            <button onclick="openModal('${booking.id}')" title="Clique para ver detalhes de ${booking.responsible}" class="w-full p-2 rounded-xl border ${badgeStyle} text-left transition hover:shadow-xs cursor-pointer">
                                 <div class="font-bold text-[11px] truncate">${booking.specialty}</div>
                                 <div class="text-[10px] opacity-80 truncate">${booking.responsible.split(' ')[0]}</div>
                             </button>
                         `;
                     } else {
                         td.innerHTML = `
-                            <button onclick="quickSelectSlot('${day}', '${shift}')" title="Reservar ${day} - ${shift}" class="w-full py-2.5 px-1 rounded-xl border border-dashed border-slate-200 text-slate-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/40 text-[11px] transition cursor-pointer">
+                            <button onclick="quickSelectSlot('${dateStr}', '${shift}')" title="Reservar ${formatDateBR(dateStr)} - ${shift}" class="w-full py-2.5 px-1 rounded-xl border border-dashed border-slate-200 text-slate-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/40 text-[11px] transition cursor-pointer">
                                 Livre
                             </button>
                         `;
@@ -841,41 +751,43 @@
             });
         }
 
-        // Preenche dia e turno ao clicar em "Livre" na grade semanal
-        function quickSelectSlot(day, shift) {
-            daySelect.value = day;
+        // Preenche data e turno ao clicar em "Livre" na grade
+        function quickSelectSlot(dateStr, shift) {
+            dateInput.value = dateStr;
+            updateDerivedDayDisplay();
             const radio = document.querySelector(`input[name="shift"][value="${shift}"]`);
             if (radio) radio.checked = true;
             checkRealTimeConflict();
             document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            showToast(`Selecionado: ${day} (${shift})`, 'info');
+            showToast(`Selecionado: ${formatDateBR(dateStr)} (${shift})`, 'info');
         }
 
         function renderBookingsTable() {
             const tbody = document.getElementById('bookingsTableBody');
             const emptyState = document.getElementById('emptyState');
             const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            const clearAllBtn = document.getElementById('clearAllBookingsBtn');
 
-            const filterDay = document.getElementById('filterDay').value;
+            const filterDate = document.getElementById('filterDate').value;
             const filterShift = document.getElementById('filterShift').value;
             const filterSpecialty = document.getElementById('filterSpecialty').value;
 
-            const hasActiveFilter = filterDay || filterShift || filterSpecialty;
+            const hasActiveFilter = filterDate || filterShift || filterSpecialty;
             clearFiltersBtn.classList.toggle('hidden', !hasActiveFilter);
+            clearAllBtn.classList.toggle('hidden', bookings.length === 0);
 
             const filtered = bookings.filter(b => {
-                const matchDay = !filterDay || b.day === filterDay;
+                const matchDate = !filterDate || b.date === filterDate;
                 const matchShift = !filterShift || b.shift === filterShift;
                 const matchSpec = !filterSpecialty || (
                     filterSpecialty === 'Outra' ? b.isOtherSpecialty : b.specialty === filterSpecialty
                 );
-                return matchDay && matchShift && matchSpec;
+                return matchDate && matchShift && matchSpec;
             });
 
-            // Ordenar por dia da semana e depois por turno
+            // Ordenar cronologicamente por data e depois por turno
             filtered.sort((a, b) => {
-                const dayDiff = DAYS_OF_WEEK.indexOf(a.day) - DAYS_OF_WEEK.indexOf(b.day);
-                if (dayDiff !== 0) return dayDiff;
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
                 return SHIFTS.indexOf(a.shift) - SHIFTS.indexOf(b.shift);
             });
 
@@ -893,14 +805,15 @@
                 tr.className = 'hover:bg-slate-50/80 transition group';
 
                 const badgeStyle = getBadgeClass(item.specialty);
+                const dayLabel = item.day || getDayNameFromISO(item.date);
 
                 tr.innerHTML = `
                     <td class="py-3.5 px-3 align-middle">
-                        <div class="font-semibold text-slate-800">${item.day}</div>
-                        <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
-                            <span class="font-medium text-teal-700">${item.shift}</span>
+                        <div class="font-semibold text-slate-800">${formatDateBR(item.date)}</div>
+                        <div class="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
+                            <span>${dayLabel}</span>
                             <span>•</span>
-                            <span>${formatDateBR(item.date)}</span>
+                            <span class="font-medium text-teal-700">${item.shift}</span>
                         </div>
                     </td>
                     <td class="py-3.5 px-3 align-middle">
@@ -910,19 +823,14 @@
                     </td>
                     <td class="py-3.5 px-3 align-middle">
                         <div class="font-medium text-slate-800">${item.responsible}</div>
-                        ${item.notes ? `<div class="text-xs text-slate-500 truncate max-w-[200px]" title="${item.notes}">${item.notes}</div>` : ''}
-                    </td>
-                    <td class="py-3.5 px-3 align-middle text-center">
-                        <button onclick="openModal('${item.id}')" title="Ampliar assinatura e detalhes" class="inline-flex flex-col items-center justify-center p-1 bg-white border border-slate-200 rounded-lg hover:border-teal-400 hover:shadow-xs transition cursor-pointer">
-                            <img src="${item.signature}" alt="Assinatura" class="h-8 w-20 object-contain">
-                        </button>
+                        ${item.notes ? `<div class="text-xs text-slate-500 truncate max-w-[220px]" title="${item.notes}">${item.notes}</div>` : ''}
                     </td>
                     <td class="py-3.5 px-3 align-middle text-right no-print">
                         <div class="inline-flex items-center gap-1">
-                            <button onclick="openModal('${item.id}')" title="Ver Comprovante" class="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition">
+                            <button onclick="openModal('${item.id}')" title="Ver Detalhes" class="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition">
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </button>
-                            <button onclick="requestDelete('${item.id}')" title="Excluir Reserva" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                            <button onclick="requestDelete('${item.id}')" title="Excluir Reserva (Requer Senha)" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -943,29 +851,29 @@
         }
 
         // Eventos dos filtros
-        ['filterDay', 'filterShift', 'filterSpecialty'].forEach(id => {
+        ['filterDate', 'filterShift', 'filterSpecialty'].forEach(id => {
             document.getElementById(id).addEventListener('change', renderBookingsTable);
         });
 
         function resetFilters() {
-            document.getElementById('filterDay').value = '';
+            document.getElementById('filterDate').value = '';
             document.getElementById('filterShift').value = '';
             document.getElementById('filterSpecialty').value = '';
             renderBookingsTable();
         }
 
         // ==========================================
-        // 6. MODAIS, EXCLUSÃO E EXPORTAÇÃO
+        // 6. MODAIS, EXCLUSÃO COM SENHA E EXPORTAÇÃO
         // ==========================================
         function openModal(id) {
             const item = bookings.find(b => b.id === id);
             if (!item) return;
 
-            document.getElementById('modalDayDate').textContent = `${item.day} (${formatDateBR(item.date)})`;
+            const dayLabel = item.day || getDayNameFromISO(item.date);
+            document.getElementById('modalDayDate').textContent = `${formatDateBR(item.date)} (${dayLabel})`;
             document.getElementById('modalShift').textContent = item.shift;
             document.getElementById('modalSpecialty').textContent = item.specialty;
             document.getElementById('modalResponsible').textContent = item.responsible;
-            document.getElementById('modalSignatureImg').src = item.signature;
 
             const notesContainer = document.getElementById('modalNotesContainer');
             if (item.notes) {
@@ -975,43 +883,94 @@
                 notesContainer.classList.add('hidden');
             }
 
-            const modal = document.getElementById('signatureModal');
+            const modal = document.getElementById('detailsModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
 
         function closeModal() {
-            const modal = document.getElementById('signatureModal');
+            const modal = document.getElementById('detailsModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
 
-        function requestDelete(id) {
-            pendingDeleteId = id;
+        function openDeleteModal(title, desc) {
+            document.getElementById('deleteModalTitle').textContent = title;
+            document.getElementById('deleteModalDesc').textContent = desc;
+            const pwdInput = document.getElementById('deletePasswordInput');
+            const pwdError = document.getElementById('deletePasswordError');
+            
+            pwdInput.value = '';
+            pwdInput.classList.remove('border-rose-500');
+            pwdError.classList.add('hidden');
+
             const modal = document.getElementById('deleteConfirmModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            lucide.createIcons();
+            setTimeout(() => pwdInput.focus(), 50);
+        }
+
+        function requestDelete(id) {
+            const item = bookings.find(b => b.id === id);
+            if (!item) return;
+            deleteMode = 'single';
+            pendingDeleteId = id;
+            openDeleteModal(
+                'Excluir Reserva?',
+                `Informe a senha para remover a reserva de ${item.specialty} (${formatDateBR(item.date)} - ${item.shift}).`
+            );
+        }
+
+        function requestDeleteAll() {
+            if (bookings.length === 0) return;
+            deleteMode = 'all';
+            pendingDeleteId = null;
+            openDeleteModal(
+                'Limpar Todas as Reservas?',
+                `Esta ação excluirá permanentemente todas as ${bookings.length} reservas registradas.`
+            );
         }
 
         function closeDeleteModal() {
+            deleteMode = null;
             pendingDeleteId = null;
             const modal = document.getElementById('deleteConfirmModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
 
-        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-            if (!pendingDeleteId) return;
-            bookings = bookings.filter(b => b.id !== pendingDeleteId);
-            saveBookingsToStorage();
-            renderAll();
-            closeDeleteModal();
-            showToast('Reserva removida com sucesso.', 'info');
+        document.getElementById('deletePasswordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pwdInput = document.getElementById('deletePasswordInput');
+            const pwdError = document.getElementById('deletePasswordError');
+
+            if (pwdInput.value !== ADMIN_DELETE_PASSWORD) {
+                pwdInput.classList.add('border-rose-500');
+                pwdError.classList.remove('hidden');
+                pwdInput.select();
+                showToast('Senha incorreta! Exclusão não autorizada.', 'error');
+                return;
+            }
+
+            if (deleteMode === 'single' && pendingDeleteId) {
+                bookings = bookings.filter(b => b.id !== pendingDeleteId);
+                saveBookingsToStorage();
+                renderAll();
+                closeDeleteModal();
+                showToast('Reserva removida com sucesso.', 'info');
+            } else if (deleteMode === 'all') {
+                bookings = [];
+                saveBookingsToStorage();
+                renderAll();
+                closeDeleteModal();
+                showToast('Todas as reservas foram removidas.', 'info');
+            }
         });
 
         // Fechar modais ao clicar fora
         window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('signatureModal')) closeModal();
+            if (e.target === document.getElementById('detailsModal')) closeModal();
             if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
         });
 
@@ -1022,15 +981,14 @@
                 return;
             }
 
-            const headers = ['Dia da Semana', 'Data', 'Turno', 'Especialidade', 'Responsável', 'Observações', 'Assinado'];
+            const headers = ['Data', 'Dia da Semana', 'Turno', 'Especialidade', 'Responsável', 'Observações'];
             const rows = bookings.map(b => [
-                `"${b.day}"`,
                 `"${formatDateBR(b.date)}"`,
+                `"${b.day || getDayNameFromISO(b.date)}"`,
                 `"${b.shift}"`,
                 `"${b.specialty}"`,
                 `"${b.responsible.replace(/"/g, '""')}"`,
-                `"${(b.notes || '').replace(/"/g, '""')}"`,
-                '"Sim (Digital)"'
+                `"${(b.notes || '').replace(/"/g, '""')}"`
             ]);
 
             const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
@@ -1039,7 +997,7 @@
             
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `reservas_auditorio_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute('download', `reservas_auditorio_${getTodayISO()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1089,12 +1047,9 @@
         // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            resizeCanvas();
             loadBookings();
             renderAll();
         });
-
-        window.addEventListener('resize', resizeCanvas);
     </script>
 </body>
 </html>
