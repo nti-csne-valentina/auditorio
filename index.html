@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Reservas — Auditório</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Prevenir scroll ao desenhar no canvas em dispositivos touch */
+        #signatureCanvas {
+            touch-action: none;
+        }
+        /* Estilos específicos para impressão */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            .print-full-width {
+                width: 100% !important;
+                max-width: 100% !important;
+                grid-column: span 12 / span 12 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .print-break-inside {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Cabeçalho Principal -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-teal-600 text-white p-2 rounded-xl shadow-sm">
+                    <i data-lucide="calendar-check-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold text-slate-900 leading-tight">Auditório Principal CSNE</h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Sistema de Agendamento e Controle de Reservas do Auditório</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="exportCSV()" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                    <i data-lucide="download" class="w-4 h-4 text-slate-500"></i>
+                    <span class="hidden sm:inline">Exportar CSV</span>
+                </button>
+                <button onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-slate-800 rounded-xl hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 transition shadow-sm">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Imprimir Cronograma</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Cabeçalho exclusivo para Impressão -->
+    <div class="hidden print:block max-w-7xl mx-auto px-6 pt-6 pb-4 border-b border-slate-300">
+        <div class="flex justify-between items-end">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Cronograma Oficial de Reservas — Auditório</h1>
+                <p class="text-sm text-slate-600 mt-1">Relatório de ocupação por dia da semana, turno e especialidade</p>
+            </div>
+            <p class="text-xs text-slate-500" id="printDate"></p>
+        </div>
+    </div>
+
+    <!-- Área de Notificações (Toast / Alerta Inline) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full px-4 sm:px-0 pointer-events-none"></div>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        
+        <!-- Cards de Resumo Rápido -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-teal-50 text-teal-600 rounded-xl">
+                    <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Reservas</p>
+                    <p id="statTotal" class="text-2xl font-bold text-slate-900">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <i data-lucide="sun" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Turno Manhã</p>
+                    <p id="statManha" class="text-2xl font-bold text-slate-900">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-orange-50 text-orange-600 rounded-xl">
+                    <i data-lucide="sunset" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Turno Tarde</p>
+                    <p id="statTarde" class="text-2xl font-bold text-slate-900">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <i data-lucide="moon" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Turno Noite</p>
+                    <p id="statNoite" class="text-2xl font-bold text-slate-900">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Coluna Esquerda: Formulário de Nova Reserva -->
+            <section class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 no-print">
+                <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-teal-500"></span>
+                        <h2 class="text-lg font-semibold text-slate-900">Nova Reserva</h2>
+                    </div>
+                    <span class="text-xs font-medium px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg">Preenchimento Obrigatório *</span>
+                </div>
+
+                <form id="bookingForm" class="space-y-4" novalidate>
+                    <!-- Dia da Semana e Data -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="daySelect" class="block text-sm font-medium text-slate-700 mb-1">Dia da Semana *</label>
+                            <select id="daySelect" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                                <option value="" disabled selected>Selecione o dia...</option>
+                                <option value="Segunda-feira">Segunda-feira</option>
+                                <option value="Terça-feira">Terça-feira</option>
+                                <option value="Quarta-feira">Quarta-feira</option>
+                                <option value="Quinta-feira">Quinta-feira</option>
+                                <option value="Sexta-feira">Sexta-feira</option>
+                                <option value="Sábado">Sábado</option>
+                                <option value="Domingo">Domingo</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="dateInput" class="block text-sm font-medium text-slate-700 mb-1">Data Específica *</label>
+                            <input type="date" id="dateInput" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                        </div>
+                    </div>
+
+                    <!-- Seleção de Turno (Botões Radio Estilizados) -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Turno da Reserva *</label>
+                        <div class="grid grid-cols-3 gap-2.5" id="shiftGroup">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="shift" value="Manhã" class="peer sr-only" required>
+                                <div class="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-600 peer-checked:border-teal-600 peer-checked:bg-teal-50 peer-checked:text-teal-800 hover:bg-slate-100 transition">
+                                    <i data-lucide="sunrise" class="w-4 h-4 mb-1"></i>
+                                    <span class="text-xs font-semibold">Manhã</span>
+                                    <span class="text-[10px] opacity-75">08h - 12h</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="shift" value="Tarde" class="peer sr-only">
+                                <div class="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-600 peer-checked:border-teal-600 peer-checked:bg-teal-50 peer-checked:text-teal-800 hover:bg-slate-100 transition">
+                                    <i data-lucide="sun" class="w-4 h-4 mb-1"></i>
+                                    <span class="text-xs font-semibold">Tarde</span>
+                                    <span class="text-[10px] opacity-75">13h - 17h</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="shift" value="Noite" class="peer sr-only">
+                                <div class="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-600 peer-checked:border-teal-600 peer-checked:bg-teal-50 peer-checked:text-teal-800 hover:bg-slate-100 transition">
+                                    <i data-lucide="moon" class="w-4 h-4 mb-1"></i>
+                                    <span class="text-xs font-semibold">Noite</span>
+                                    <span class="text-[10px] opacity-75">18h - 22h</span>
+                                </div>
+                            </label>
+                        </div>
+                        <!-- Indicador de disponibilidade instantânea -->
+                        <div id="availabilityHint" class="mt-2 text-xs hidden rounded-lg px-3 py-2 flex items-center gap-2"></div>
+                    </div>
+
+                    <!-- Especialidade Médica -->
+                    <div>
+                        <label for="specialtySelect" class="block text-sm font-medium text-slate-700 mb-1">Especialidade *</label>
+                        <select id="specialtySelect" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                            <option value="" disabled selected>Escolha a especialidade...</option>
+                            <option value="Odontologia">Odontologia</option>
+                            <option value="Medicina">Medicina</option>
+                            <option value="Fisioterapia">Fisioterapia</option>
+                            <option value="Oftalmologia">Oftalmologia</option>
+                            <option value="Dermatologia">Dermatologia</option>
+                            <option value="Outra">Outra Especialidade...</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo condicional para "Outra" especialidade -->
+                    <div id="otherSpecialtyContainer" class="hidden">
+                        <label for="otherSpecialtyInput" class="block text-sm font-medium text-slate-700 mb-1">Qual especialidade/evento? *</label>
+                        <input type="text" id="otherSpecialtyInput" placeholder="Ex: Enfermagem, Nutrição, Palestra Geral..." class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                    </div>
+
+                    <!-- Nome do Responsável -->
+                    <div>
+                        <label for="responsibleInput" class="block text-sm font-medium text-slate-700 mb-1">Nome do Responsável pela Reserva *</label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </div>
+                            <input type="text" id="responsibleInput" required placeholder="Dr(a). ou Prof. Nome Completo" class="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div>
+                        <label for="notesInput" class="block text-sm font-medium text-slate-700 mb-1">Observações / Recursos Necessários</label>
+                        <textarea id="notesInput" rows="2" placeholder="Ex: Projetor, 2 microfones sem fio, 60 cadeiras..." class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"></textarea>
+                    </div>
+
+                    <!-- Assinatura Digital Canvas -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-sm font-medium text-slate-700">Assinatura Digital do Responsável *</label>
+                            <button type="button" id="clearSignatureBtn" class="inline-flex items-center gap-1 text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg transition">
+                                <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
+                                Limpar
+                            </button>
+                        </div>
+                        <div id="canvasWrapper" class="relative w-full h-36 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-teal-400 transition">
+                            <canvas id="signatureCanvas" class="w-full h-full cursor-crosshair block"></canvas>
+                            <div id="signaturePlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-slate-400 select-none">
+                                <i data-lucide="pen-tool" class="w-5 h-5 mb-1 opacity-60"></i>
+                                <span class="text-xs">Assine aqui com o mouse ou dedo</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">A assinatura confirma a ciência das normas de uso do auditório.</p>
+                    </div>
+
+                    <!-- Botão de Submissão -->
+                    <div class="pt-2">
+                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold py-3 px-4 rounded-xl shadow-sm hover:shadow transition focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                            Confirmar e Salvar Reserva
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Coluna Direita: Grade Visual & Lista de Reservas -->
+            <section class="lg:col-span-7 space-y-6 print-full-width">
+                
+                <!-- Grade Semanal Visual (Matriz Dias x Turnos) -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 print-break-inside">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="layout-grid" class="w-5 h-5 text-teal-600"></i>
+                                Grade Semanal de Ocupação
+                            </h2>
+                            <p class="text-xs text-slate-500">Visão rápida de horários livres e ocupados na semana</p>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs">
+                            <span class="inline-flex items-center gap-1.5 text-slate-600">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Livre
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 text-slate-600">
+                                <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span> Reservado
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-y border-slate-200">
+                                    <th class="py-2.5 px-3 font-semibold w-24">Turno</th>
+                                    <th class="py-2.5 px-2 font-semibold text-center">Seg</th>
+                                    <th class="py-2.5 px-2 font-semibold text-center">Ter</th>
+                                    <th class="py-2.5 px-2 font-semibold text-center">Qua</th>
+                                    <th class="py-2.5 px-2 font-semibold text-center">Qui</th>
+                                    <th class="py-2.5 px-2 font-semibold text-center">Sex</th>
+                                    <th class="py-2.5 px-2 font-semibold text-center">Sáb</th>
+                                    <th class="py-2.5 px-2 font-semibold text-center">Dom</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weeklyGridBody" class="divide-y divide-slate-100 text-xs">
+                                <!-- Preenchido dinamicamente via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Lista Detalhada de Reservas e Filtros -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="list-checks" class="w-5 h-5 text-teal-600"></i>
+                                Reservas Confirmadas
+                            </h2>
+                            <p class="text-xs text-slate-500">Consulte responsáveis, observações e assinaturas</p>
+                        </div>
+
+                        <!-- Botão limpar tudo (opcional, discreto) -->
+                        <button id="clearFiltersBtn" onclick="resetFilters()" class="hidden text-xs font-medium text-teal-600 hover:text-teal-700 self-start sm:self-auto no-print">
+                            Limpar filtros
+                        </button>
+                    </div>
+
+                    <!-- Barra de Filtros -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 no-print">
+                        <div>
+                            <label for="filterDay" class="sr-only">Filtrar por Dia</label>
+                            <select id="filterDay" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
+                                <option value="">Todos os Dias</option>
+                                <option value="Segunda-feira">Segunda-feira</option>
+                                <option value="Terça-feira">Terça-feira</option>
+                                <option value="Quarta-feira">Quarta-feira</option>
+                                <option value="Quinta-feira">Quinta-feira</option>
+                                <option value="Sexta-feira">Sexta-feira</option>
+                                <option value="Sábado">Sábado</option>
+                                <option value="Domingo">Domingo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterShift" class="sr-only">Filtrar por Turno</label>
+                            <select id="filterShift" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
+                                <option value="">Todos os Turnos</option>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                                <option value="Noite">Noite</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterSpecialty" class="sr-only">Filtrar por Especialidade</label>
+                            <select id="filterSpecialty" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-teal-500 focus:bg-white focus:outline-none transition">
+                                <option value="">Todas Especialidades</option>
+                                <option value="Odontologia">Odontologia</option>
+                                <option value="Medicina">Medicina</option>
+                                <option value="Fisioterapia">Fisioterapia</option>
+                                <option value="Oftalmologia">Oftalmologia</option>
+                                <option value="Dermatologia">Dermatologia</option>
+                                <option value="Outra">Outras</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Reservas -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                    <th class="py-3 px-3">Dia / Turno</th>
+                                    <th class="py-3 px-3">Especialidade</th>
+                                    <th class="py-3 px-3">Responsável</th>
+                                    <th class="py-3 px-3 text-center">Assinatura</th>
+                                    <th class="py-3 px-3 text-right no-print">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookingsTableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Estado Vazio -->
+                    <div id="emptyState" class="hidden py-12 text-center">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mb-3">
+                            <i data-lucide="calendar-x" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-slate-800">Nenhuma reserva encontrada</h3>
+                        <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Não há agendamentos registrados para os filtros selecionados ou a agenda está livre.</p>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal para Visualizar Detalhes e Assinatura Ampliada -->
+    <div id="signatureModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/70">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="file-signature" class="w-5 h-5 text-teal-600"></i>
+                    Comprovante de Reserva
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Dia / Data</span>
+                        <span id="modalDayDate" class="font-semibold text-slate-800"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Turno</span>
+                        <span id="modalShift" class="font-semibold text-slate-800"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Especialidade</span>
+                        <span id="modalSpecialty" class="font-semibold text-teal-700"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Responsável</span>
+                        <span id="modalResponsible" class="font-semibold text-slate-800"></span>
+                    </div>
+                </div>
+
+                <div id="modalNotesContainer" class="text-xs">
+                    <span class="text-slate-500 font-medium block mb-1">Observações:</span>
+                    <p id="modalNotes" class="text-slate-700 bg-amber-50/60 border border-amber-100 rounded-xl p-2.5"></p>
+                </div>
+
+                <div>
+                    <span class="text-xs font-medium text-slate-500 block mb-1.5">Assinatura Digital Registrada:</span>
+                    <div class="border border-slate-200 rounded-xl bg-white p-3 flex items-center justify-center">
+                        <img id="modalSignatureImg" src="" alt="Assinatura do Responsável" class="max-h-36 w-auto object-contain">
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition">
+                    Fechar Comprovante
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão (Substitui window.confirm) -->
+    <div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-5 text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900">Cancelar Reserva?</h3>
+            <p class="text-xs text-slate-500 mt-1.5 mb-5">Esta ação removerá o agendamento da grade e liberará o horário no auditório.</p>
+            <div class="flex items-center gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 py-2.5 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+                    Manter
+                </button>
+                <button id="confirmDeleteBtn" class="flex-1 py-2.5 px-4 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition">
+                    Sim, Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. DADOS E ESTADO DA APLICAÇÃO
+        // ==========================================
+        const STORAGE_KEY = 'auditorio_reservas_v1';
+        const DAYS_OF_WEEK = [
+            'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
+            'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'
+        ];
+        const SHIFTS = ['Manhã', 'Tarde', 'Noite'];
+
+        // Cores por especialidade para tags visuais
+        const SPECIALTY_BADGES = {
+            'Odontologia': 'bg-sky-50 text-sky-700 border-sky-200',
+            'Medicina': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            'Fisioterapia': 'bg-amber-50 text-amber-700 border-amber-200',
+            'Oftalmologia': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            'Dermatologia': 'bg-rose-50 text-rose-700 border-rose-200',
+            'default': 'bg-purple-50 text-purple-700 border-purple-200'
+        };
+
+        let bookings = [];
+        let pendingDeleteId = null;
+
+        // ==========================================
+        // 2. CANVAS DE ASSINATURA DIGITAL
+        // ==========================================
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        const placeholder = document.getElementById('signaturePlaceholder');
+        let isDrawing = false;
+        let hasSignature = false;
+
+        function resizeCanvas() {
+            const wrapper = document.getElementById('canvasWrapper');
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            
+            // Salva o conteúdo atual se já houver assinatura
+            const tempImage = hasSignature ? canvas.toDataURL() : null;
+
+            canvas.width = wrapper.clientWidth * ratio;
+            canvas.height = wrapper.clientHeight * ratio;
+            ctx.scale(ratio, ratio);
+
+            // Estilo do traço
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 2.4;
+            ctx.strokeStyle = '#0f172a'; // slate-900
+
+            if (tempImage) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, wrapper.clientWidth, wrapper.clientHeight);
+                };
+                img.src = tempImage;
+            }
+        }
+
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            hasSignature = true;
+            placeholder.classList.add('hidden');
+            const { x, y } = getCoordinates(e);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            if (e.cancelable) e.preventDefault();
+            const { x, y } = getCoordinates(e);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            ctx.closePath();
+        }
+
+        function clearSignature() {
+            const wrapper = document.getElementById('canvasWrapper');
+            ctx.clearRect(0, 0, wrapper.clientWidth, wrapper.clientHeight);
+            hasSignature = false;
+            placeholder.classList.remove('hidden');
+        }
+
+        // Eventos Mouse & Touch no Canvas
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        window.addEventListener('mouseup', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        document.getElementById('clearSignatureBtn').addEventListener('click', clearSignature);
+
+        // ==========================================
+        // 3. INICIALIZAÇÃO E DADOS EXEMPLO
+        // ==========================================
+        function createSampleSignatureDataURL(name) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 260;
+            tempCanvas.height = 90;
+            const tCtx = tempCanvas.getContext('2d');
+            tCtx.font = 'italic 24px Georgia, serif';
+            tCtx.fillStyle = '#1e293b';
+            tCtx.fillText(name, 20, 52);
+            tCtx.beginPath();
+            tCtx.moveTo(20, 62);
+            tCtx.quadraticCurveTo(110, 56, 210, 64);
+            tCtx.strokeStyle = '#0d9488';
+            tCtx.lineWidth = 1.5;
+            tCtx.stroke();
+            return tempCanvas.toDataURL();
+        }
+
+        function loadBookings() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    bookings = JSON.parse(stored);
+                } else {
+                    // Dados iniciais de demonstração
+                    const today = new Date().toISOString().split('T')[0];
+                    bookings = [
+                        {
+                            id: 'demo-1',
+                            day: 'Segunda-feira',
+                            date: today,
+                            shift: 'Manhã',
+                            specialty: 'Medicina',
+                            isOtherSpecialty: false,
+                            responsible: 'Dr. Carlos Eduardo Mendes',
+                            notes: 'Simpósio de Clínica Médica — Necessário projetor e 2 microfones.',
+                            signature: createSampleSignatureDataURL('Dr. Carlos E. Mendes')
+                        },
+                        {
+                            id: 'demo-2',
+                            day: 'Quarta-feira',
+                            date: today,
+                            shift: 'Tarde',
+                            specialty: 'Odontologia',
+                            isOtherSpecialty: false,
+                            responsible: 'Dra. Mariana Albuquerque',
+                            notes: 'Aula magna de Implantodontia.',
+                            signature: createSampleSignatureDataURL('Dra. Mariana A.')
+                        }
+                    ];
+                    saveBookingsToStorage();
+                }
+            } catch (err) {
+                console.error('Erro ao carregar dados:', err);
+                bookings = [];
+            }
+        }
+
+        function saveBookingsToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+            } catch (err) {
+                showToast('Não foi possível salvar no armazenamento local.', 'error');
+            }
+        }
+
+        // ==========================================
+        // 4. LÓGICA DO FORMULÁRIO E CONFLITOS
+        // ==========================================
+        const daySelect = document.getElementById('daySelect');
+        const dateInput = document.getElementById('dateInput');
+        const specialtySelect = document.getElementById('specialtySelect');
+        const otherSpecialtyContainer = document.getElementById('otherSpecialtyContainer');
+        const otherSpecialtyInput = document.getElementById('otherSpecialtyInput');
+        const availabilityHint = document.getElementById('availabilityHint');
+
+        // Define data padrão para hoje
+        dateInput.value = new Date().toISOString().split('T')[0];
+
+        // Sincroniza automaticamente o dia da semana ao escolher uma data
+        dateInput.addEventListener('change', () => {
+            if (!dateInput.value) return;
+            const [year, month, day] = dateInput.value.split('-').map(Number);
+            const dateObj = new Date(year, month - 1, day);
+            // getDay(): 0 = Domingo, 1 = Segunda...
+            const mapDay = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            daySelect.value = mapDay[dateObj.getDay()];
+            checkRealTimeConflict();
+        });
+
+        // Mostra/esconde campo "Outra" especialidade
+        specialtySelect.addEventListener('change', () => {
+            if (specialtySelect.value === 'Outra') {
+                otherSpecialtyContainer.classList.remove('hidden');
+                otherSpecialtyInput.required = true;
+                otherSpecialtyInput.focus();
+            } else {
+                otherSpecialtyContainer.classList.add('hidden');
+                otherSpecialtyInput.required = false;
+                otherSpecialtyInput.value = '';
+            }
+        });
+
+        // Verifica conflito em tempo real ao mudar dia ou turno
+        daySelect.addEventListener('change', checkRealTimeConflict);
+        document.querySelectorAll('input[name="shift"]').forEach(radio => {
+            radio.addEventListener('change', checkRealTimeConflict);
+        });
+
+        function findConflict(day, shift) {
+            return bookings.find(b => b.day === day && b.shift === shift);
+        }
+
+        function checkRealTimeConflict() {
+            const selectedDay = daySelect.value;
+            const selectedShiftEl = document.querySelector('input[name="shift"]:checked');
+            
+            if (!selectedDay || !selectedShiftEl) {
+                availabilityHint.classList.add('hidden');
+                return;
+            }
+
+            const conflict = findConflict(selectedDay, selectedShiftEl.value);
+            availabilityHint.classList.remove('hidden');
+
+            if (conflict) {
+                availabilityHint.className = 'mt-2 text-xs rounded-lg px-3 py-2 flex items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200';
+                availabilityHint.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span>Conflito: Já reservado para <strong>${conflict.specialty}</strong> (${conflict.responsible}).</span>`;
+            } else {
+                availabilityHint.className = 'mt-2 text-xs rounded-lg px-3 py-2 flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200';
+                availabilityHint.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span>Horário disponível para reserva!</span>`;
+            }
+            lucide.createIcons();
+        }
+
+        // Submissão do Formulário
+        document.getElementById('bookingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const day = daySelect.value;
+            const date = dateInput.value;
+            const shiftEl = document.querySelector('input[name="shift"]:checked');
+            const shift = shiftEl ? shiftEl.value : '';
+            const rawSpecialty = specialtySelect.value;
+            const isOther = rawSpecialty === 'Outra';
+            const specialty = isOther ? otherSpecialtyInput.value.trim() : rawSpecialty;
+            const responsible = document.getElementById('responsibleInput').value.trim();
+            const notes = document.getElementById('notesInput').value.trim();
+
+            // Validações
+            if (!day || !date || !shift || !specialty || !responsible) {
+                showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+
+            if (!hasSignature) {
+                showToast('A assinatura digital do responsável é obrigatória.', 'error');
+                document.getElementById('canvasWrapper').classList.add('border-rose-400', 'bg-rose-50/30');
+                setTimeout(() => {
+                    document.getElementById('canvasWrapper').classList.remove('border-rose-400', 'bg-rose-50/30');
+                }, 2000);
+                return;
+            }
+
+            // Bloqueio de conflito de horário (mesmo dia e turno)
+            const conflict = findConflict(day, shift);
+            if (conflict) {
+                showToast(`Conflito de horário! ${day} (${shift}) já está reservado para ${conflict.specialty}.`, 'error');
+                return;
+            }
+
+            const newBooking = {
+                id: 'res-' + Date.now(),
+                day,
+                date,
+                shift,
+                specialty,
+                isOtherSpecialty: isOther,
+                responsible,
+                notes,
+                signature: canvas.toDataURL('image/png')
+            };
+
+            bookings.push(newBooking);
+            saveBookingsToStorage();
+            renderAll();
+
+            // Resetar formulário
+            e.target.reset();
+            dateInput.value = new Date().toISOString().split('T')[0];
+            otherSpecialtyContainer.classList.add('hidden');
+            availabilityHint.classList.add('hidden');
+            clearSignature();
+
+            showToast('Reserva registrada com sucesso!', 'success');
+        });
+
+        // ==========================================
+        // 5. RENDERIZAÇÃO DA GRADE, TABELA E ESTATÍSTICAS
+        // ==========================================
+        function formatDateBR(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function getBadgeClass(specialty) {
+            return SPECIALTY_BADGES[specialty] || SPECIALTY_BADGES['default'];
+        }
+
+        function renderStats() {
+            document.getElementById('statTotal').textContent = bookings.length;
+            document.getElementById('statManha').textContent = bookings.filter(b => b.shift === 'Manhã').length;
+            document.getElementById('statTarde').textContent = bookings.filter(b => b.shift === 'Tarde').length;
+            document.getElementById('statNoite').textContent = bookings.filter(b => b.shift === 'Noite').length;
+        }
+
+        function renderWeeklyGrid() {
+            const gridBody = document.getElementById('weeklyGridBody');
+            gridBody.innerHTML = '';
+
+            SHIFTS.forEach(shift => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/60 transition';
+
+                // Coluna do Turno
+                const tdShift = document.createElement('td');
+                tdShift.className = 'py-3 px-3 font-semibold text-slate-700 bg-slate-50/50 border-r border-slate-100';
+                tdShift.innerHTML = `
+                    <div class="flex items-center gap-1.5">
+                        <span>${shift}</span>
+                    </div>
+                `;
+                tr.appendChild(tdShift);
+
+                // Colunas dos Dias
+                DAYS_OF_WEEK.forEach(day => {
+                    const td = document.createElement('td');
+                    td.className = 'p-1.5 text-center align-middle';
+
+                    const booking = bookings.find(b => b.day === day && b.shift === shift);
+
+                    if (booking) {
+                        const badgeStyle = getBadgeClass(booking.specialty);
+                        td.innerHTML = `
+                            <button onclick="openModal('${booking.id}')" title="Clique para ver detalhes de ${booking.responsible}" class="w-full p-2 rounded-xl border ${badgeStyle} text-left transition hover:shadow-xs cursor-pointer group">
+                                <div class="font-bold text-[11px] truncate">${booking.specialty}</div>
+                                <div class="text-[10px] opacity-80 truncate">${booking.responsible.split(' ')[0]}</div>
+                            </button>
+                        `;
+                    } else {
+                        td.innerHTML = `
+                            <button onclick="quickSelectSlot('${day}', '${shift}')" title="Reservar ${day} - ${shift}" class="w-full py-2.5 px-1 rounded-xl border border-dashed border-slate-200 text-slate-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/40 text-[11px] transition cursor-pointer">
+                                Livre
+                            </button>
+                        `;
+                    }
+                    tr.appendChild(td);
+                });
+
+                gridBody.appendChild(tr);
+            });
+        }
+
+        // Preenche dia e turno ao clicar em "Livre" na grade semanal
+        function quickSelectSlot(day, shift) {
+            daySelect.value = day;
+            const radio = document.querySelector(`input[name="shift"][value="${shift}"]`);
+            if (radio) radio.checked = true;
+            checkRealTimeConflict();
+            document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showToast(`Selecionado: ${day} (${shift})`, 'info');
+        }
+
+        function renderBookingsTable() {
+            const tbody = document.getElementById('bookingsTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+            const filterDay = document.getElementById('filterDay').value;
+            const filterShift = document.getElementById('filterShift').value;
+            const filterSpecialty = document.getElementById('filterSpecialty').value;
+
+            const hasActiveFilter = filterDay || filterShift || filterSpecialty;
+            clearFiltersBtn.classList.toggle('hidden', !hasActiveFilter);
+
+            const filtered = bookings.filter(b => {
+                const matchDay = !filterDay || b.day === filterDay;
+                const matchShift = !filterShift || b.shift === filterShift;
+                const matchSpec = !filterSpecialty || (
+                    filterSpecialty === 'Outra' ? b.isOtherSpecialty : b.specialty === filterSpecialty
+                );
+                return matchDay && matchShift && matchSpec;
+            });
+
+            // Ordenar por dia da semana e depois por turno
+            filtered.sort((a, b) => {
+                const dayDiff = DAYS_OF_WEEK.indexOf(a.day) - DAYS_OF_WEEK.indexOf(b.day);
+                if (dayDiff !== 0) return dayDiff;
+                return SHIFTS.indexOf(a.shift) - SHIFTS.indexOf(b.shift);
+            });
+
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition group';
+
+                const badgeStyle = getBadgeClass(item.specialty);
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-3 align-middle">
+                        <div class="font-semibold text-slate-800">${item.day}</div>
+                        <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
+                            <span class="font-medium text-teal-700">${item.shift}</span>
+                            <span>•</span>
+                            <span>${formatDateBR(item.date)}</span>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-3 align-middle">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${badgeStyle}">
+                            ${item.specialty}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-3 align-middle">
+                        <div class="font-medium text-slate-800">${item.responsible}</div>
+                        ${item.notes ? `<div class="text-xs text-slate-500 truncate max-w-[200px]" title="${item.notes}">${item.notes}</div>` : ''}
+                    </td>
+                    <td class="py-3.5 px-3 align-middle text-center">
+                        <button onclick="openModal('${item.id}')" title="Ampliar assinatura e detalhes" class="inline-flex flex-col items-center justify-center p-1 bg-white border border-slate-200 rounded-lg hover:border-teal-400 hover:shadow-xs transition cursor-pointer">
+                            <img src="${item.signature}" alt="Assinatura" class="h-8 w-20 object-contain">
+                        </button>
+                    </td>
+                    <td class="py-3.5 px-3 align-middle text-right no-print">
+                        <div class="inline-flex items-center gap-1">
+                            <button onclick="openModal('${item.id}')" title="Ver Comprovante" class="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="requestDelete('${item.id}')" title="Excluir Reserva" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        function renderAll() {
+            renderStats();
+            renderWeeklyGrid();
+            renderBookingsTable();
+            checkRealTimeConflict();
+            document.getElementById('printDate').textContent = 'Gerado em: ' + new Date().toLocaleString('pt-BR');
+        }
+
+        // Eventos dos filtros
+        ['filterDay', 'filterShift', 'filterSpecialty'].forEach(id => {
+            document.getElementById(id).addEventListener('change', renderBookingsTable);
+        });
+
+        function resetFilters() {
+            document.getElementById('filterDay').value = '';
+            document.getElementById('filterShift').value = '';
+            document.getElementById('filterSpecialty').value = '';
+            renderBookingsTable();
+        }
+
+        // ==========================================
+        // 6. MODAIS, EXCLUSÃO E EXPORTAÇÃO
+        // ==========================================
+        function openModal(id) {
+            const item = bookings.find(b => b.id === id);
+            if (!item) return;
+
+            document.getElementById('modalDayDate').textContent = `${item.day} (${formatDateBR(item.date)})`;
+            document.getElementById('modalShift').textContent = item.shift;
+            document.getElementById('modalSpecialty').textContent = item.specialty;
+            document.getElementById('modalResponsible').textContent = item.responsible;
+            document.getElementById('modalSignatureImg').src = item.signature;
+
+            const notesContainer = document.getElementById('modalNotesContainer');
+            if (item.notes) {
+                notesContainer.classList.remove('hidden');
+                document.getElementById('modalNotes').textContent = item.notes;
+            } else {
+                notesContainer.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('signatureModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('signatureModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function requestDelete(id) {
+            pendingDeleteId = id;
+            const modal = document.getElementById('deleteConfirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            pendingDeleteId = null;
+            const modal = document.getElementById('deleteConfirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if (!pendingDeleteId) return;
+            bookings = bookings.filter(b => b.id !== pendingDeleteId);
+            saveBookingsToStorage();
+            renderAll();
+            closeDeleteModal();
+            showToast('Reserva removida com sucesso.', 'info');
+        });
+
+        // Fechar modais ao clicar fora
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('signatureModal')) closeModal();
+            if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
+        });
+
+        // Exportar cronograma para CSV (Excel)
+        function exportCSV() {
+            if (bookings.length === 0) {
+                showToast('Não há reservas para exportar.', 'error');
+                return;
+            }
+
+            const headers = ['Dia da Semana', 'Data', 'Turno', 'Especialidade', 'Responsável', 'Observações', 'Assinado'];
+            const rows = bookings.map(b => [
+                `"${b.day}"`,
+                `"${formatDateBR(b.date)}"`,
+                `"${b.shift}"`,
+                `"${b.specialty}"`,
+                `"${b.responsible.replace(/"/g, '""')}"`,
+                `"${(b.notes || '').replace(/"/g, '""')}"`,
+                '"Sim (Digital)"'
+            ]);
+
+            const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `reservas_auditorio_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast('Arquivo CSV exportado com sucesso!', 'success');
+        }
+
+        // Sistema de Notificação Toast
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            const styles = {
+                success: 'bg-emerald-900 text-white border-emerald-700',
+                error: 'bg-rose-900 text-white border-rose-700',
+                info: 'bg-slate-900 text-white border-slate-700'
+            };
+
+            const icons = {
+                success: 'check-circle-2',
+                error: 'alert-circle',
+                info: 'info'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0"></i>
+                <span class="flex-1">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ==========================================
+        // 7. BOOTSTRAP DA PÁGINA
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            resizeCanvas();
+            loadBookings();
+            renderAll();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
