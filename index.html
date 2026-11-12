@@ -16,6 +16,14 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.35s ease-in-out;
+        }
         /* Estilos específicos para impressão */
         @media print {
             .no-print {
@@ -42,23 +50,45 @@
 
     <!-- Cabeçalho Principal -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-teal-600 text-white p-2 rounded-xl shadow-sm">
-                    <i data-lucide="calendar-check-2" class="w-6 h-6"></i>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <!-- Logo Centro de Saúde Nova Esperança (com fallback vetorial SVG idêntico) -->
+                <div class="shrink-0 flex items-center">
+                    <img src="logo centro de saude.png" alt="Centro de Saúde Nova Esperança" class="h-10 sm:h-12 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                    <svg class="hidden h-10 sm:h-12 w-auto" viewBox="0 0 680 185" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Centro de Saúde Nova Esperança">
+                        <!-- Coração estilizado externo -->
+                        <path d="M98 48C86 24 58 14 34 24C8 35 -2 68 12 102C25 133 58 160 88 182C118 158 156 126 176 92C198 54 185 16 154 7C128 -1 108 16 98 48Z" fill="#1877B5"/>
+                        <!-- Contorno branco interno esquerdo -->
+                        <path d="M40 31C21 38 14 64 25 93C35 119 60 143 84 164C62 141 42 117 33 93C23 67 29 44 46 35C56 30 68 31 80 37C67 28 52 26 40 31Z" fill="#FFFFFF"/>
+                        <!-- Contorno branco superior direito -->
+                        <path d="M148 16C132 12 117 21 107 39C118 26 132 20 146 24C166 30 175 53 163 78C177 50 169 22 148 16Z" fill="#FFFFFF"/>
+                        <!-- Coração azul ciano intermediário -->
+                        <path d="M97 58C87 40 66 33 49 41C31 50 24 73 35 98C45 121 68 143 90 161C113 142 141 117 156 91C172 62 162 34 139 27C120 21 105 34 97 58Z" fill="#0095D4"/>
+                        <!-- Coração branco central -->
+                        <path d="M97 84C90 71 75 66 63 72C50 78 46 95 54 113C61 129 77 144 92 156C108 143 127 126 138 107C149 87 142 67 126 62C113 58 103 67 97 84Z" fill="#FFFFFF"/>
+                        <!-- Faixa inferior azul -->
+                        <path d="M154 96H645C663.225 96 678 110.775 678 129C678 147.225 663.225 162 645 162H112L154 96Z" fill="#1877B5"/>
+                        <!-- Texto Superior: CENTRO DE SAÚDE -->
+                        <text x="196" y="83" fill="#1877B5" font-family="'Inter', 'Arial Narrow', sans-serif" font-weight="800" font-size="53" letter-spacing="-0.5">CENTRO DE SAÚDE</text>
+                        <!-- Texto Inferior: NOVA ESPERANÇA -->
+                        <text x="196" y="147" fill="#FFFFFF" font-family="'Inter', 'Arial Narrow', sans-serif" font-weight="800" font-size="53" letter-spacing="0.5">NOVA ESPERANÇA</text>
+                    </svg>
                 </div>
-                <div>
-                    <h1 class="text-lg sm:text-xl font-bold text-slate-900 leading-tight">Auditório Principal CSNE</h1>
-                    <p class="text-xs text-slate-500 hidden sm:block">Sistema de Agendamento e Controle de Reservas do Auditório</p>
+
+                <div class="hidden md:block h-8 w-px bg-slate-200"></div>
+
+                <div class="hidden md:block truncate">
+                    <h1 class="text-base font-bold text-slate-900 leading-tight">Auditório Principal CSNE</h1>
+                    <p class="text-xs text-slate-500">Sistema de Agendamento e Controle de Reservas do Auditório</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-3">
-                <button onclick="exportCSV()" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <button type="button" onclick="exportCSV()" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
                     <i data-lucide="download" class="w-4 h-4 text-slate-500"></i>
                     <span class="hidden sm:inline">Exportar CSV</span>
                 </button>
-                <button onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-slate-800 rounded-xl hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 transition shadow-sm">
+                <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-slate-800 rounded-xl hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 transition shadow-sm">
                     <i data-lucide="printer" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Imprimir Cronograma</span>
                 </button>
@@ -68,12 +98,25 @@
 
     <!-- Cabeçalho exclusivo para Impressão -->
     <div class="hidden print:block max-w-7xl mx-auto px-6 pt-6 pb-4 border-b border-slate-300">
-        <div class="flex justify-between items-end">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-900">Cronograma Oficial de Reservas — Auditório</h1>
-                <p class="text-sm text-slate-600 mt-1">Relatório de ocupação por dia da semana, turno e especialidade</p>
+        <div class="flex justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <img src="logo centro de saude.png" alt="Centro de Saúde Nova Esperança" class="h-12 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                <svg class="hidden h-12 w-auto" viewBox="0 0 680 185" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M98 48C86 24 58 14 34 24C8 35 -2 68 12 102C25 133 58 160 88 182C118 158 156 126 176 92C198 54 185 16 154 7C128 -1 108 16 98 48Z" fill="#1877B5"/>
+                    <path d="M40 31C21 38 14 64 25 93C35 119 60 143 84 164C62 141 42 117 33 93C23 67 29 44 46 35C56 30 68 31 80 37C67 28 52 26 40 31Z" fill="#FFFFFF"/>
+                    <path d="M148 16C132 12 117 21 107 39C118 26 132 20 146 24C166 30 175 53 163 78C177 50 169 22 148 16Z" fill="#FFFFFF"/>
+                    <path d="M97 58C87 40 66 33 49 41C31 50 24 73 35 98C45 121 68 143 90 161C113 142 141 117 156 91C172 62 162 34 139 27C120 21 105 34 97 58Z" fill="#0095D4"/>
+                    <path d="M97 84C90 71 75 66 63 72C50 78 46 95 54 113C61 129 77 144 92 156C108 143 127 126 138 107C149 87 142 67 126 62C113 58 103 67 97 84Z" fill="#FFFFFF"/>
+                    <path d="M154 96H645C663.225 96 678 110.775 678 129C678 147.225 663.225 162 645 162H112L154 96Z" fill="#1877B5"/>
+                    <text x="196" y="83" fill="#1877B5" font-family="'Inter', 'Arial Narrow', sans-serif" font-weight="800" font-size="53" letter-spacing="-0.5">CENTRO DE SAÚDE</text>
+                    <text x="196" y="147" fill="#FFFFFF" font-family="'Inter', 'Arial Narrow', sans-serif" font-weight="800" font-size="53" letter-spacing="0.5">NOVA ESPERANÇA</text>
+                </svg>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">Cronograma Oficial de Reservas — Auditório</h1>
+                    <p class="text-xs text-slate-600 mt-0.5">Relatório de ocupação por data, turno e especialidade</p>
+                </div>
             </div>
-            <p class="text-xs text-slate-500" id="printDate"></p>
+            <p class="text-xs text-slate-500 text-right" id="printDate"></p>
         </div>
     </div>
 
@@ -280,12 +323,12 @@
                         </div>
 
                         <div class="flex items-center gap-3 self-start sm:self-auto no-print">
-                            <button id="clearFiltersBtn" onclick="resetFilters()" class="hidden text-xs font-medium text-teal-600 hover:text-teal-700">
+                            <button type="button" id="clearFiltersBtn" onclick="resetFilters()" class="hidden text-xs font-medium text-teal-600 hover:text-teal-700">
                                 Limpar filtros
                             </button>
-                            <button id="clearAllBookingsBtn" onclick="requestDeleteAll()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                Limpar Todas
+                            <button type="button" id="clearAllBookingsBtn" data-action="delete-all" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition cursor-pointer">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i>
+                                <span>Limpar Todas</span>
                             </button>
                         </div>
                     </div>
@@ -338,6 +381,18 @@
 
                     <!-- Estado Vazio -->
                     <div id="emptyState" class="hidden py-12 text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="calendar-x-2" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-700">Nenhuma reserva encontrada</p>
+                        <p class="text-xs text-slate-500 mt-1">Cadastre uma nova reserva ao lado ou ajuste os filtros acima.</p>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
     <!-- Modal para Visualizar Detalhes da Reserva -->
     <div id="detailsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 no-print" role="dialog" aria-modal="true">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
@@ -346,7 +401,7 @@
                     <i data-lucide="calendar-check" class="w-5 h-5 text-teal-600"></i>
                     Comprovante de Reserva
                 </h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition">
+                <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -378,7 +433,7 @@
             </div>
 
             <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex justify-end">
-                <button onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 transition">
                     Fechar Comprovante
                 </button>
             </div>
@@ -396,22 +451,27 @@
                 <p id="deleteModalDesc" class="text-xs text-slate-500 mt-1.5 mb-4">Digite a senha administrativa para autorizar a exclusão.</p>
             </div>
 
-            <form id="deletePasswordForm" class="space-y-3">
+            <form id="deletePasswordForm" class="space-y-3" novalidate>
                 <div>
                     <label for="deletePasswordInput" class="block text-xs font-medium text-slate-700 mb-1">Senha de Administrador *</label>
-                    <input type="password" id="deletePasswordInput" autocomplete="off" placeholder="Digite a senha..." class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition">
-                    <p id="deletePasswordError" class="hidden text-xs font-medium text-rose-600 mt-1.5 flex items-center gap-1">
+                    <div class="relative">
+                        <input type="password" id="deletePasswordInput" autocomplete="off" placeholder="Digite a senha..." class="w-full rounded-xl border border-slate-300 bg-white pl-3.5 pr-10 py-2.5 text-sm text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition">
+                        <button type="button" id="togglePasswordVisibilityBtn" title="Mostrar/Ocultar senha" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition cursor-pointer">
+                            <i id="togglePasswordIcon" data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
+                        </button>
+                    </div>
+                    <div id="deletePasswordError" class="hidden mt-2 text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
                         <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
-                        <span>Senha incorreta. Tente novamente.</span>
-                    </p>
+                        <span>Senha incorreta! Tente novamente.</span>
+                    </div>
                     <p class="text-[11px] text-slate-400 mt-1.5">Senha padrão: <code class="font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">admin123</code></p>
                 </div>
 
                 <div class="flex items-center gap-3 pt-2">
-                    <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+                    <button type="button" id="cancelDeleteBtn" class="flex-1 py-2.5 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
                         Cancelar
                     </button>
-                    <button type="submit" class="flex-1 py-2.5 px-4 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition">
+                    <button type="submit" class="flex-1 py-2.5 px-4 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition cursor-pointer">
                         Confirmar Exclusão
                     </button>
                 </div>
@@ -421,87 +481,116 @@
 
     <script>
         // ==========================================
-        // 1. DADOS E ESTADO DA APLICAÇÃO
+        // 1. CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
         // ==========================================
         const STORAGE_KEY = 'auditorio_reservas_v2';
-        const ADMIN_DELETE_PASSWORD = 'admin123';
-        const DAYS_OF_WEEK = [
-            'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 
-            'Quinta-feira', 'Sexta-feira', 'Sábado'
-        ];
-        const SHORT_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const ADMIN_DELETE_PASSWORD = 'admin123'; // Senha padrão para exclusão
         const SHIFTS = ['Manhã', 'Tarde', 'Noite'];
+        const WEEKDAY_NAMES = [
+            'Domingo',
+            'Segunda-feira',
+            'Terça-feira',
+            'Quarta-feira',
+            'Quinta-feira',
+            'Sexta-feira',
+            'Sábado'
+        ];
+        const WEEKDAY_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-        // Cores por especialidade para tags visuais
+        // Cores por especialidade
         const SPECIALTY_BADGES = {
             'Odontologia': 'bg-sky-50 text-sky-700 border-sky-200',
             'Medicina': 'bg-emerald-50 text-emerald-700 border-emerald-200',
             'Fisioterapia': 'bg-amber-50 text-amber-700 border-amber-200',
-            'Oftalmologia': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            'Oftalmologia': 'bg-purple-50 text-purple-700 border-purple-200',
             'Dermatologia': 'bg-rose-50 text-rose-700 border-rose-200',
-            'default': 'bg-purple-50 text-purple-700 border-purple-200'
+            'Default': 'bg-slate-100 text-slate-700 border-slate-200'
         };
 
         let bookings = [];
         let deleteMode = null; // 'single' | 'all'
         let pendingDeleteId = null;
-        let currentWeekOffset = 0; // Deslocamento em dias para a grade semanal
+        let gridReferenceDate = new Date(); // Referência para a semana exibida na grade
 
         // ==========================================
-        // 2. UTILITÁRIOS DE DATA
+        // 2. UTILITÁRIOS DE DATA E FORMATAÇÃO
         // ==========================================
+        function dateToISO(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
         function getTodayISO() {
-            const now = new Date();
-            const offset = now.getTimezoneOffset() * 60000;
-            return new Date(now - offset).toISOString().split('T')[0];
+            return dateToISO(new Date());
         }
 
-        function addDaysISO(baseISO, daysToAdd) {
-            const [y, m, d] = baseISO.split('-').map(Number);
-            const dateObj = new Date(y, m - 1, d + daysToAdd);
-            const yr = dateObj.getFullYear();
-            const mo = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const da = String(dateObj.getDate()).padStart(2, '0');
-            return `${yr}-${mo}-${da}`;
+        function parseISODate(isoStr) {
+            if (!isoStr) return null;
+            const [y, m, d] = isoStr.split('-').map(Number);
+            if (!y || !m || !d) return null;
+            return new Date(y, m - 1, d);
         }
 
-        function getDayNameFromISO(dateStr) {
-            if (!dateStr) return '—';
-            const [year, month, day] = dateStr.split('-').map(Number);
-            const dateObj = new Date(year, month - 1, day);
-            return DAYS_OF_WEEK[dateObj.getDay()];
-        }
-
-        function formatDateBR(dateStr) {
-            if (!dateStr) return '';
-            const [y, m, d] = dateStr.split('-');
+        function formatDateBR(isoDate) {
+            if (!isoDate) return '-';
+            const [y, m, d] = isoDate.split('-');
             return `${d}/${m}/${y}`;
         }
 
-        function formatShortDateBR(dateStr) {
-            if (!dateStr) return '';
-            const [, m, d] = dateStr.split('-');
+        function formatShortDateBR(isoDate) {
+            if (!isoDate) return '-';
+            const [, m, d] = isoDate.split('-');
             return `${d}/${m}`;
         }
 
-        // Retorna array de 7 datas ISO (Segunda a Domingo) com base no offset atual
-        function getWeekDatesISO(offsetDays = 0) {
-            const todayISO = addDaysISO(getTodayISO(), offsetDays);
-            const [y, m, d] = todayISO.split('-').map(Number);
-            const refDate = new Date(y, m - 1, d);
-            const dayOfWeek = refDate.getDay(); // 0 = Dom, 1 = Seg...
-            const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-            const mondayISO = addDaysISO(todayISO, diffToMonday);
+        function getDayNameFromISO(isoDate) {
+            const d = parseISODate(isoDate);
+            if (!d) return '—';
+            return WEEKDAY_NAMES[d.getDay()];
+        }
 
-            const dates = [];
+        function updateDerivedDayLabel() {
+            const dateVal = document.getElementById('dateInput').value;
+            const dayName = getDayNameFromISO(dateVal);
+            document.getElementById('derivedDayText').textContent = dayName;
+        }
+
+        // Retorna os 7 dias (Segunda a Domingo) da semana da data de referência
+        function getWeekDays(refDate) {
+            const d = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate());
+            const dayOfWeek = d.getDay(); // 0 (Dom) a 6 (Sáb)
+            const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(d);
+            monday.setDate(d.getDate() + diffToMonday);
+
+            const days = [];
             for (let i = 0; i < 7; i++) {
-                dates.push(addDaysISO(mondayISO, i));
+                const current = new Date(monday);
+                current.setDate(monday.getDate() + i);
+                days.push({
+                    iso: dateToISO(current),
+                    shortName: WEEKDAY_SHORT[current.getDay()],
+                    fullName: WEEKDAY_NAMES[current.getDay()],
+                    shortDate: formatShortDateBR(dateToISO(current))
+                });
             }
-            return dates;
+            return days;
+        }
+
+        function changeGridWeek(offsetDays) {
+            gridReferenceDate.setDate(gridReferenceDate.getDate() + offsetDays);
+            renderWeeklyGrid();
+        }
+
+        function resetGridWeek() {
+            gridReferenceDate = new Date();
+            renderWeeklyGrid();
         }
 
         // ==========================================
-        // 3. INICIALIZAÇÃO E DADOS EXEMPLO
+        // 3. PERSISTÊNCIA (LOCALSTORAGE)
         // ==========================================
         function loadBookings() {
             try {
@@ -509,34 +598,44 @@
                 if (stored) {
                     bookings = JSON.parse(stored);
                 } else {
-                    const today = getTodayISO();
-                    const plusTwo = addDaysISO(today, 2);
+                    // Exemplos iniciais na semana atual
+                    const weekDays = getWeekDays(new Date());
                     bookings = [
                         {
                             id: 'demo-1',
-                            date: today,
-                            day: getDayNameFromISO(today),
+                            date: weekDays[0].iso,
+                            day: weekDays[0].fullName,
                             shift: 'Manhã',
                             specialty: 'Medicina',
-                            isOtherSpecialty: false,
                             responsible: 'Dr. Carlos Eduardo Mendes',
-                            notes: 'Simpósio de Clínica Médica — Necessário projetor e 2 microfones.'
+                            notes: 'Simpósio de Clínica Médica — Projetor e 2 microfones.',
+                            createdAt: new Date().toISOString()
                         },
                         {
                             id: 'demo-2',
-                            date: plusTwo,
-                            day: getDayNameFromISO(plusTwo),
+                            date: weekDays[2].iso,
+                            day: weekDays[2].fullName,
                             shift: 'Tarde',
                             specialty: 'Odontologia',
-                            isOtherSpecialty: false,
                             responsible: 'Dra. Mariana Albuquerque',
-                            notes: 'Aula magna de Implantodontia.'
+                            notes: 'Aula magna de Implantodontia.',
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: 'demo-3',
+                            date: weekDays[4].iso,
+                            day: weekDays[4].fullName,
+                            shift: 'Noite',
+                            specialty: 'Dermatologia',
+                            responsible: 'Dra. Beatriz Vasconcelos',
+                            notes: 'Workshop de Dermatoscopia.',
+                            createdAt: new Date().toISOString()
                         }
                     ];
                     saveBookingsToStorage();
                 }
             } catch (err) {
-                console.error('Erro ao carregar dados:', err);
+                console.error('Erro ao carregar reservas:', err);
                 bookings = [];
             }
         }
@@ -545,34 +644,21 @@
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
             } catch (err) {
-                showToast('Não foi possível salvar no armazenamento local.', 'error');
+                console.error('Erro ao salvar no LocalStorage:', err);
             }
         }
 
         // ==========================================
-        // 4. LÓGICA DO FORMULÁRIO E CONFLITOS
+        // 4. INTERATIVIDADE DO FORMULÁRIO
         // ==========================================
         const dateInput = document.getElementById('dateInput');
-        const derivedDayText = document.getElementById('derivedDayText');
+        dateInput.value = getTodayISO();
+        updateDerivedDayLabel();
+
         const specialtySelect = document.getElementById('specialtySelect');
         const otherSpecialtyContainer = document.getElementById('otherSpecialtyContainer');
         const otherSpecialtyInput = document.getElementById('otherSpecialtyInput');
-        const availabilityHint = document.getElementById('availabilityHint');
 
-        function updateDerivedDayDisplay() {
-            derivedDayText.textContent = getDayNameFromISO(dateInput.value);
-        }
-
-        // Define data padrão para hoje e atualiza o dia da semana derivado
-        dateInput.value = getTodayISO();
-        updateDerivedDayDisplay();
-
-        dateInput.addEventListener('change', () => {
-            updateDerivedDayDisplay();
-            checkRealTimeConflict();
-        });
-
-        // Mostra/esconde campo "Outra" especialidade
         specialtySelect.addEventListener('change', () => {
             if (specialtySelect.value === 'Outra') {
                 otherSpecialtyContainer.classList.remove('hidden');
@@ -585,38 +671,46 @@
             }
         });
 
-        // Verifica conflito em tempo real ao mudar turno
-        document.querySelectorAll('input[name="shift"]').forEach(radio => {
-            radio.addEventListener('change', checkRealTimeConflict);
-        });
-
-        function findConflict(date, shift) {
-            return bookings.find(b => b.date === date && b.shift === shift);
-        }
-
-        function checkRealTimeConflict() {
+        function checkInstantAvailability() {
             const selectedDate = dateInput.value;
-            const selectedShiftEl = document.querySelector('input[name="shift"]:checked');
-            
-            if (!selectedDate || !selectedShiftEl) {
-                availabilityHint.classList.add('hidden');
+            const shiftRadio = document.querySelector('input[name="shift"]:checked');
+            const hintBox = document.getElementById('availabilityHint');
+
+            if (!selectedDate || !shiftRadio) {
+                hintBox.classList.add('hidden');
                 return;
             }
 
-            const conflict = findConflict(selectedDate, selectedShiftEl.value);
-            availabilityHint.classList.remove('hidden');
+            const selectedShift = shiftRadio.value;
+            const conflict = bookings.find(b => b.date === selectedDate && b.shift === selectedShift);
 
+            hintBox.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200', 'border');
+            
             if (conflict) {
-                availabilityHint.className = 'mt-2 text-xs rounded-lg px-3 py-2 flex items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200';
-                availabilityHint.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span>Conflito em ${formatDateBR(selectedDate)}: Já reservado para <strong>${conflict.specialty}</strong> (${conflict.responsible}).</span>`;
+                hintBox.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200');
+                hintBox.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> <span><strong>Ocupado:</strong> Já reservado para <em>${conflict.specialty}</em> (${conflict.responsible}).</span>`;
             } else {
-                availabilityHint.className = 'mt-2 text-xs rounded-lg px-3 py-2 flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200';
-                availabilityHint.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span>Horário disponível em ${formatDateBR(selectedDate)} (${getDayNameFromISO(selectedDate)})!</span>`;
+                hintBox.classList.add('bg-emerald-50', 'text-emerald-700', 'border', 'border-emerald-200');
+                hintBox.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span><strong>Disponível:</strong> Horário livre em ${formatDateBR(selectedDate)} (${getDayNameFromISO(selectedDate)}).</span>`;
             }
             lucide.createIcons();
         }
 
-        // Submissão do Formulário
+        dateInput.addEventListener('change', () => {
+            updateDerivedDayLabel();
+            checkInstantAvailability();
+            const parsed = parseISODate(dateInput.value);
+            if (parsed) {
+                gridReferenceDate = parsed;
+                renderWeeklyGrid();
+            }
+        });
+
+        document.querySelectorAll('input[name="shift"]').forEach(radio => {
+            radio.addEventListener('change', checkInstantAvailability);
+        });
+
+        // Submissão do formulário
         document.getElementById('bookingForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -625,21 +719,34 @@
             const shiftEl = document.querySelector('input[name="shift"]:checked');
             const shift = shiftEl ? shiftEl.value : '';
             const rawSpecialty = specialtySelect.value;
-            const isOther = rawSpecialty === 'Outra';
-            const specialty = isOther ? otherSpecialtyInput.value.trim() : rawSpecialty;
+            const specialty = rawSpecialty === 'Outra' ? otherSpecialtyInput.value.trim() : rawSpecialty;
             const responsible = document.getElementById('responsibleInput').value.trim();
             const notes = document.getElementById('notesInput').value.trim();
 
-            // Validações
-            if (!date || !shift || !specialty || !responsible) {
-                showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
+            if (!date) {
+                showToast('Selecione a data da reserva.', 'error');
+                dateInput.focus();
+                return;
+            }
+            if (!shift) {
+                showToast('Selecione o turno desejado (Manhã, Tarde ou Noite).', 'error');
+                return;
+            }
+            if (!specialty) {
+                showToast('Informe a especialidade médica.', 'error');
+                specialtySelect.focus();
+                return;
+            }
+            if (!responsible) {
+                showToast('Informe o nome do responsável pela reserva.', 'error');
+                document.getElementById('responsibleInput').focus();
                 return;
             }
 
-            // Bloqueio de conflito de horário (mesma data e mesmo turno)
-            const conflict = findConflict(date, shift);
-            if (conflict) {
-                showToast(`Conflito de horário! ${formatDateBR(date)} (${shift}) já está reservado para ${conflict.specialty}.`, 'error');
+            // Bloqueio de conflito (mesma data e mesmo turno)
+            const hasConflict = bookings.some(b => b.date === date && b.shift === shift);
+            if (hasConflict) {
+                showToast(`Conflito! O auditório já está ocupado em ${formatDateBR(date)} no turno da ${shift}.`, 'error');
                 return;
             }
 
@@ -649,147 +756,135 @@
                 day,
                 shift,
                 specialty,
-                isOtherSpecialty: isOther,
                 responsible,
-                notes
+                notes,
+                createdAt: new Date().toISOString()
             };
 
-            bookings.push(newBooking);
+            bookings.unshift(newBooking);
             saveBookingsToStorage();
             renderAll();
 
-            // Resetar formulário mantendo data atual
-            e.target.reset();
-            dateInput.value = date;
-            updateDerivedDayDisplay();
+            // Limpa apenas campos específicos, preservando a data
+            document.querySelectorAll('input[name="shift"]').forEach(r => r.checked = false);
+            specialtySelect.value = '';
             otherSpecialtyContainer.classList.add('hidden');
-            availabilityHint.classList.add('hidden');
+            otherSpecialtyInput.value = '';
+            document.getElementById('responsibleInput').value = '';
+            document.getElementById('notesInput').value = '';
+            document.getElementById('availabilityHint').classList.add('hidden');
 
-            showToast('Reserva registrada com sucesso!', 'success');
+            showToast(`Reserva confirmada para ${formatDateBR(date)} (${shift})!`, 'success');
         });
 
         // ==========================================
-        // 5. RENDERIZAÇÃO DA GRADE, TABELA E ESTATÍSTICAS
+        // 5. RENDERIZAÇÃO DA GRADE, TABELA E CARDS
         // ==========================================
-        function getBadgeClass(specialty) {
-            return SPECIALTY_BADGES[specialty] || SPECIALTY_BADGES['default'];
+        function renderAll() {
+            updateStats();
+            renderWeeklyGrid();
+            renderBookingsTable();
+            document.getElementById('printDate').textContent = `Emitido em: ${new Date().toLocaleString('pt-BR')}`;
         }
 
-        function renderStats() {
+        function updateStats() {
             document.getElementById('statTotal').textContent = bookings.length;
             document.getElementById('statManha').textContent = bookings.filter(b => b.shift === 'Manhã').length;
             document.getElementById('statTarde').textContent = bookings.filter(b => b.shift === 'Tarde').length;
             document.getElementById('statNoite').textContent = bookings.filter(b => b.shift === 'Noite').length;
         }
 
-        function changeGridWeek(daysDelta) {
-            currentWeekOffset += daysDelta;
-            renderWeeklyGrid();
-        }
-
-        function resetGridWeek() {
-            currentWeekOffset = 0;
-            renderWeeklyGrid();
-        }
-
         function renderWeeklyGrid() {
-            const weekDates = getWeekDatesISO(currentWeekOffset);
+            const theadRow = document.getElementById('weeklyGridHeader');
+            const tbody = document.getElementById('weeklyGridBody');
+            const weekDays = getWeekDays(gridReferenceDate);
             const todayISO = getTodayISO();
-            const gridHeader = document.getElementById('weeklyGridHeader');
-            const gridBody = document.getElementById('weeklyGridBody');
 
-            // Renderizar Cabeçalho com Dia e Data
-            gridHeader.innerHTML = `<th class="py-2.5 px-3 font-semibold w-24">Turno</th>`;
-            weekDates.forEach(dateStr => {
-                const [y, m, d] = dateStr.split('-').map(Number);
-                const dayIdx = new Date(y, m - 1, d).getDay();
-                const isToday = dateStr === todayISO;
-                gridHeader.innerHTML += `
-                    <th class="py-2 px-1.5 font-semibold text-center ${isToday ? 'bg-teal-50/80 text-teal-800' : ''}">
-                        <div>${SHORT_DAYS[dayIdx]}</div>
-                        <div class="text-[10px] font-normal ${isToday ? 'text-teal-700 font-semibold' : 'text-slate-400'}">${formatShortDateBR(dateStr)}</div>
+            theadRow.innerHTML = `<th class="py-2.5 px-3 font-semibold w-24">Turno</th>`;
+            weekDays.forEach(d => {
+                const isToday = d.iso === todayISO;
+                theadRow.innerHTML += `
+                    <th class="py-2 px-2 font-semibold text-center ${isToday ? 'text-teal-700 bg-teal-50/70' : ''}">
+                        <div>${d.shortName}</div>
+                        <div class="text-[10px] font-normal ${isToday ? 'text-teal-600 font-semibold' : 'text-slate-400'}">${d.shortDate}</div>
                     </th>
                 `;
             });
 
-            // Renderizar Corpo da Grade
-            gridBody.innerHTML = '';
+            tbody.innerHTML = '';
+
             SHIFTS.forEach(shift => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50/60 transition';
+                let rowHtml = `<td class="py-3 px-3 font-semibold text-slate-700 bg-slate-50/50">${shift}</td>`;
 
-                const tdShift = document.createElement('td');
-                tdShift.className = 'py-3 px-3 font-semibold text-slate-700 bg-slate-50/50 border-r border-slate-100';
-                tdShift.innerHTML = `<span>${shift}</span>`;
-                tr.appendChild(tdShift);
-
-                weekDates.forEach(dateStr => {
-                    const td = document.createElement('td');
-                    td.className = 'p-1.5 text-center align-middle';
-
-                    const booking = bookings.find(b => b.date === dateStr && b.shift === shift);
-
+                weekDays.forEach(d => {
+                    const booking = bookings.find(b => b.date === d.iso && b.shift === shift);
                     if (booking) {
-                        const badgeStyle = getBadgeClass(booking.specialty);
-                        td.innerHTML = `
-                            <button onclick="openModal('${booking.id}')" title="Clique para ver detalhes de ${booking.responsible}" class="w-full p-2 rounded-xl border ${badgeStyle} text-left transition hover:shadow-xs cursor-pointer">
-                                <div class="font-bold text-[11px] truncate">${booking.specialty}</div>
-                                <div class="text-[10px] opacity-80 truncate">${booking.responsible.split(' ')[0]}</div>
-                            </button>
+                        const badgeClass = SPECIALTY_BADGES[booking.specialty] || SPECIALTY_BADGES['Default'];
+                        rowHtml += `
+                            <td class="p-1.5 text-center align-middle">
+                                <button type="button" onclick="openModal('${booking.id}')" title="${booking.specialty} - ${booking.responsible}" class="w-full px-2 py-1.5 rounded-lg border text-[11px] font-semibold truncate block transition hover:opacity-80 ${badgeClass}">
+                                    ${booking.specialty}
+                                </button>
+                            </td>
                         `;
                     } else {
-                        td.innerHTML = `
-                            <button onclick="quickSelectSlot('${dateStr}', '${shift}')" title="Reservar ${formatDateBR(dateStr)} - ${shift}" class="w-full py-2.5 px-1 rounded-xl border border-dashed border-slate-200 text-slate-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/40 text-[11px] transition cursor-pointer">
-                                Livre
-                            </button>
+                        rowHtml += `
+                            <td class="p-1.5 text-center align-middle">
+                                <button type="button" onclick="quickFillForm('${d.iso}', '${shift}')" title="Clique para reservar ${formatDateBR(d.iso)} (${shift})" class="w-full py-1.5 rounded-lg border border-dashed border-slate-200 text-slate-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/40 text-[10px] transition no-print">
+                                    Livre
+                                </button>
+                                <span class="hidden print:inline text-slate-300 text-[10px]">—</span>
+                            </td>
                         `;
                     }
-                    tr.appendChild(td);
                 });
 
-                gridBody.appendChild(tr);
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
             });
         }
 
-        // Preenche data e turno ao clicar em "Livre" na grade
-        function quickSelectSlot(dateStr, shift) {
-            dateInput.value = dateStr;
-            updateDerivedDayDisplay();
+        function quickFillForm(isoDate, shift) {
+            dateInput.value = isoDate;
+            updateDerivedDayLabel();
             const radio = document.querySelector(`input[name="shift"][value="${shift}"]`);
             if (radio) radio.checked = true;
-            checkRealTimeConflict();
-            document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            showToast(`Selecionado: ${formatDateBR(dateStr)} (${shift})`, 'info');
+            checkInstantAvailability();
+            specialtySelect.focus();
+            showToast(`Data ${formatDateBR(isoDate)} (${shift}) selecionada.`, 'info');
+        }
+
+        function getFilteredBookings() {
+            const filterDate = document.getElementById('filterDate').value;
+            const filterShift = document.getElementById('filterShift').value;
+            const filterSpec = document.getElementById('filterSpecialty').value;
+
+            const hasActiveFilter = filterDate || filterShift || filterSpec;
+            document.getElementById('clearFiltersBtn').classList.toggle('hidden', !hasActiveFilter);
+
+            const knownSpecs = ['Odontologia', 'Medicina', 'Fisioterapia', 'Oftalmologia', 'Dermatologia'];
+
+            return bookings
+                .filter(b => {
+                    if (filterDate && b.date !== filterDate) return false;
+                    if (filterShift && b.shift !== filterShift) return false;
+                    if (filterSpec) {
+                        if (filterSpec === 'Outra') {
+                            if (knownSpecs.includes(b.specialty)) return false;
+                        } else if (b.specialty !== filterSpec) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .sort((a, b) => a.date.localeCompare(b.date));
         }
 
         function renderBookingsTable() {
             const tbody = document.getElementById('bookingsTableBody');
             const emptyState = document.getElementById('emptyState');
-            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-            const clearAllBtn = document.getElementById('clearAllBookingsBtn');
-
-            const filterDate = document.getElementById('filterDate').value;
-            const filterShift = document.getElementById('filterShift').value;
-            const filterSpecialty = document.getElementById('filterSpecialty').value;
-
-            const hasActiveFilter = filterDate || filterShift || filterSpecialty;
-            clearFiltersBtn.classList.toggle('hidden', !hasActiveFilter);
-            clearAllBtn.classList.toggle('hidden', bookings.length === 0);
-
-            const filtered = bookings.filter(b => {
-                const matchDate = !filterDate || b.date === filterDate;
-                const matchShift = !filterShift || b.shift === filterShift;
-                const matchSpec = !filterSpecialty || (
-                    filterSpecialty === 'Outra' ? b.isOtherSpecialty : b.specialty === filterSpecialty
-                );
-                return matchDate && matchShift && matchSpec;
-            });
-
-            // Ordenar cronologicamente por data e depois por turno
-            filtered.sort((a, b) => {
-                if (a.date !== b.date) return a.date.localeCompare(b.date);
-                return SHIFTS.indexOf(a.shift) - SHIFTS.indexOf(b.shift);
-            });
+            const filtered = getFilteredBookings();
 
             tbody.innerHTML = '';
 
@@ -801,37 +896,34 @@
             emptyState.classList.add('hidden');
 
             filtered.forEach(item => {
+                const badgeClass = SPECIALTY_BADGES[item.specialty] || SPECIALTY_BADGES['Default'];
+                const dayName = item.day || getDayNameFromISO(item.date);
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/80 transition group';
 
-                const badgeStyle = getBadgeClass(item.specialty);
-                const dayLabel = item.day || getDayNameFromISO(item.date);
-
                 tr.innerHTML = `
                     <td class="py-3.5 px-3 align-middle">
-                        <div class="font-semibold text-slate-800">${formatDateBR(item.date)}</div>
-                        <div class="flex items-center gap-1.5 mt-0.5 text-xs text-slate-500">
-                            <span>${dayLabel}</span>
-                            <span>•</span>
-                            <span class="font-medium text-teal-700">${item.shift}</span>
+                        <div class="font-semibold text-slate-900">${formatDateBR(item.date)}</div>
+                        <div class="text-xs text-slate-500 mt-0.5">
+                            <span class="font-medium text-teal-700">${item.shift}</span> • ${dayName}
                         </div>
                     </td>
                     <td class="py-3.5 px-3 align-middle">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${badgeStyle}">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${badgeClass}">
                             ${item.specialty}
                         </span>
                     </td>
                     <td class="py-3.5 px-3 align-middle">
                         <div class="font-medium text-slate-800">${item.responsible}</div>
-                        ${item.notes ? `<div class="text-xs text-slate-500 truncate max-w-[220px]" title="${item.notes}">${item.notes}</div>` : ''}
+                        ${item.notes ? `<div class="text-xs text-slate-400 truncate max-w-[200px]" title="${item.notes}">${item.notes}</div>` : ''}
                     </td>
                     <td class="py-3.5 px-3 align-middle text-right no-print">
                         <div class="inline-flex items-center gap-1">
-                            <button onclick="openModal('${item.id}')" title="Ver Detalhes" class="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            <button type="button" data-action="view-details" data-id="${item.id}" title="Ver Detalhes" class="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition cursor-pointer">
+                                <i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i>
                             </button>
-                            <button onclick="requestDelete('${item.id}')" title="Excluir Reserva (Requer Senha)" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <button type="button" data-action="delete-single" data-id="${item.id}" title="Excluir Reserva (Requer Senha)" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer">
+                                <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
                             </button>
                         </div>
                     </td>
@@ -842,15 +934,6 @@
             lucide.createIcons();
         }
 
-        function renderAll() {
-            renderStats();
-            renderWeeklyGrid();
-            renderBookingsTable();
-            checkRealTimeConflict();
-            document.getElementById('printDate').textContent = 'Gerado em: ' + new Date().toLocaleString('pt-BR');
-        }
-
-        // Eventos dos filtros
         ['filterDate', 'filterShift', 'filterSpecialty'].forEach(id => {
             document.getElementById(id).addEventListener('change', renderBookingsTable);
         });
@@ -869,8 +952,8 @@
             const item = bookings.find(b => b.id === id);
             if (!item) return;
 
-            const dayLabel = item.day || getDayNameFromISO(item.date);
-            document.getElementById('modalDayDate').textContent = `${formatDateBR(item.date)} (${dayLabel})`;
+            const dayName = item.day || getDayNameFromISO(item.date);
+            document.getElementById('modalDayDate').textContent = `${formatDateBR(item.date)} (${dayName})`;
             document.getElementById('modalShift').textContent = item.shift;
             document.getElementById('modalSpecialty').textContent = item.specialty;
             document.getElementById('modalResponsible').textContent = item.responsible;
@@ -899,10 +982,13 @@
             document.getElementById('deleteModalDesc').textContent = desc;
             const pwdInput = document.getElementById('deletePasswordInput');
             const pwdError = document.getElementById('deletePasswordError');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
             
             pwdInput.value = '';
-            pwdInput.classList.remove('border-rose-500');
+            pwdInput.type = 'password';
+            pwdInput.classList.remove('border-rose-500', 'animate-shake');
             pwdError.classList.add('hidden');
+            if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'eye');
 
             const modal = document.getElementById('deleteConfirmModal');
             modal.classList.remove('hidden');
@@ -923,7 +1009,10 @@
         }
 
         function requestDeleteAll() {
-            if (bookings.length === 0) return;
+            if (bookings.length === 0) {
+                showToast('Não há reservas para excluir.', 'info');
+                return;
+            }
             deleteMode = 'all';
             pendingDeleteId = null;
             openDeleteModal(
@@ -940,15 +1029,70 @@
             modal.classList.remove('flex');
         }
 
+        // Alternar visualização da senha no modal
+        document.getElementById('togglePasswordVisibilityBtn').addEventListener('click', () => {
+            const pwdInput = document.getElementById('deletePasswordInput');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+            const isHidden = pwdInput.type === 'password';
+            pwdInput.type = isHidden ? 'text' : 'password';
+            toggleIcon.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
+            lucide.createIcons();
+            pwdInput.focus();
+        });
+
+        document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+
+        // Delegação de eventos global para os botões de ação (Excluir, Limpar Todas, Detalhes e Fechar Modais)
+        document.addEventListener('click', (e) => {
+            const actionBtn = e.target.closest('[data-action]');
+            if (actionBtn) {
+                const action = actionBtn.dataset.action;
+                const id = actionBtn.dataset.id;
+
+                if (action === 'delete-single' && id) {
+                    e.preventDefault();
+                    requestDelete(id);
+                    return;
+                }
+                if (action === 'delete-all') {
+                    e.preventDefault();
+                    requestDeleteAll();
+                    return;
+                }
+                if (action === 'view-details' && id) {
+                    e.preventDefault();
+                    openModal(id);
+                    return;
+                }
+            }
+
+            if (e.target === document.getElementById('detailsModal')) closeModal();
+            if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
+        });
+
+        // Fechar modais com a tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeDeleteModal();
+            }
+        });
+
         document.getElementById('deletePasswordForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const pwdInput = document.getElementById('deletePasswordInput');
             const pwdError = document.getElementById('deletePasswordError');
+            const enteredPassword = pwdInput.value.trim();
 
-            if (pwdInput.value !== ADMIN_DELETE_PASSWORD) {
+            if (enteredPassword !== ADMIN_DELETE_PASSWORD) {
+                pwdInput.value = '';
                 pwdInput.classList.add('border-rose-500');
+                pwdInput.classList.remove('animate-shake');
+                void pwdInput.offsetWidth; // Reinicia a animação CSS
+                pwdInput.classList.add('animate-shake');
                 pwdError.classList.remove('hidden');
-                pwdInput.select();
+                lucide.createIcons();
+                pwdInput.focus();
                 showToast('Senha incorreta! Exclusão não autorizada.', 'error');
                 return;
             }
@@ -958,20 +1102,14 @@
                 saveBookingsToStorage();
                 renderAll();
                 closeDeleteModal();
-                showToast('Reserva removida com sucesso.', 'info');
+                showToast('Reserva excluída com sucesso!', 'success');
             } else if (deleteMode === 'all') {
                 bookings = [];
                 saveBookingsToStorage();
                 renderAll();
                 closeDeleteModal();
-                showToast('Todas as reservas foram removidas.', 'info');
+                showToast('Todas as reservas foram excluídas com sucesso!', 'success');
             }
-        });
-
-        // Fechar modais ao clicar fora
-        window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('detailsModal')) closeModal();
-            if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
         });
 
         // Exportar cronograma para CSV (Excel)
